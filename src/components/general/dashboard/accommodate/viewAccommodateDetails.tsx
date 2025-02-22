@@ -51,62 +51,64 @@ const ViewAccommodateDetails: FC<{
             </div>
             {user?.accommodationRequestsByUserId.__typename ===
               "QueryAccommodationRequestsByUserIdSuccess" && (
-              <>
-                <div className="flex flex-col text-lg font-semibold">
-                  <div>
-                    {user.accommodationRequestsByUserId.data[0]?.user.name}
-                  </div>
-                  <div>
-                    {user.accommodationRequestsByUserId.data[0]?.user.email}
-                  </div>
-                  <div>
-                    {
-                      user.accommodationRequestsByUserId.data[0]?.user
-                        ?.phoneNumber
-                    }
-                  </div>
-                  <div>
-                    {user.accommodationRequestsByUserId.data[0]?.gender}
-                  </div>
-                  <div>
-                    {user.accommodationRequestsByUserId.data[0]?.hotel.name}
-                  </div>
-                  <div>
-                    {user.accommodationRequestsByUserId.data[0]?.room ??
-                      "Pending"}
-                  </div>
-                  <div>
-                    {user.accommodationRequestsByUserId.data[0]?.checkIn
-                      ? new Date(
+                <>
+                  <div className="flex flex-col text-lg font-semibold">
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.user.name}
+                    </div>
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.user.email}
+                    </div>
+                    <div>
+                      {
+                        user.accommodationRequestsByUserId.data[0]?.user
+                          ?.phoneNumber
+                      }
+                    </div>
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.gender}
+                    </div>
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.hotel.name}
+                    </div>
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.room ??
+                        "Pending"}
+                    </div>
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.checkIn
+                        ? new Date(
                           user.accommodationRequestsByUserId.data[0].checkIn,
                         ).toLocaleString("en-IN", {
                           timeZone: "Asia/Kolkata",
                         })
-                      : "Not Available"}
-                  </div>
-                  <div>
-                    {user.accommodationRequestsByUserId.data[0]?.checkOut
-                      ? new Date(
+                        : "Not Available"}
+                    </div>
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.checkOut
+                        ? new Date(
                           user?.accommodationRequestsByUserId.data[0].checkOut,
                         ).toLocaleString("en-IN", {
                           timeZone: "Asia/Kolkata",
                         })
-                      : "Not Available"}
+                        : "Not Available"}
+                    </div>
                   </div>
-                </div>
-                <div className="text-center">
-                  <Image
-                    src={
-                      user.accommodationRequestsByUserId.data[0]?.IdCard ?? ""
-                    }
-                    alt="ID card"
-                    width={200}
-                    height={200}
-                  ></Image>
-                  ID
-                </div>
-              </>
-            )}
+                  <div className="text-center">
+                    <Image
+                      src={
+                        user.accommodationRequestsByUserId.data[0]?.IdCard ?? ""
+                      }
+                      alt="ID card"
+                      width={200}
+                      height={200}
+                    />
+                    <span className="font-bold">
+                      ID
+                    </span>
+                  </div>
+                </>
+              )}
           </div>
         </div>
       </Modal>

@@ -1,0 +1,19 @@
+query GetSponsors {
+  getSponsors {
+    ... on Error {
+      __typename
+      message
+    }
+    ... on QueryGetSponsorsSuccess {
+      __typename
+      data {
+        description
+        id
+        imageUrl
+        name
+        title
+        websiteUrl
+      }
+    }
+  }
+}

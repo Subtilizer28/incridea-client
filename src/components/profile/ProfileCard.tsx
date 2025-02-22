@@ -1,41 +1,42 @@
 /* eslint-disable */
-import { MeQuery, MeQueryVariables, type User } from "~/generated/generated";
 import * as THREE from "three";
+import { QueryResult } from "@apollo/client";
+import {
+  Environment,
+  Lightformer,
+  PerspectiveCamera,
+  RenderTexture,
+  useGLTF,
+  useTexture,
+} from "@react-three/drei";
 import {
   Canvas,
   extend,
-  useThree,
-  useFrame,
-  type ObjectMap,
-  type Object3DNode,
   MaterialNode,
+  type Object3DNode,
+  type ObjectMap,
+  useFrame,
+  useThree,
 } from "@react-three/fiber";
-import {
-  useGLTF,
-  useTexture,
-  PerspectiveCamera,
-  RenderTexture,
-  Environment,
-  Lightformer,
-} from "@react-three/drei";
 import {
   BallCollider,
   CuboidCollider,
   Physics,
-  RigidBody,
   type RapierRigidBody,
+  RigidBody,
   useRopeJoint,
   useSphericalJoint,
 } from "@react-three/rapier";
-import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 import { Container, Root, Text, Image as ThreeImage } from "@react-three/uikit";
 import { damp } from "maath/easing";
+import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 import { useEffect, useRef, useState } from "react";
 import { type GLTF } from "three-stdlib";
-import qrcodeDataURI from "~/utils/qr";
-import { idToPid } from "~/utils/id";
-import { QueryResult } from "@apollo/client";
+
+import { CONSTANT } from "~/constants";
 import { useAuth } from "~/hooks/useAuth";
+import { idToPid } from "~/utils/id";
+import qrcodeDataURI from "~/utils/qr";
 
 type BadgeGLTF = GLTF &
   ObjectMap & {
@@ -46,11 +47,10 @@ type BadgeGLTF = GLTF &
     };
   };
 
-
-function truncateText(text:string,maxChar=20) {
-  text = text.trim()
-  if(text.length>maxChar){
-    return text.slice(0,maxChar) + `${text.length}`;
+function truncateText(text: string, maxChar = 20) {
+  text = text.trim();
+  if (text.length > maxChar) {
+    return text.slice(0, maxChar) + "...";
   }
   return text;
 }
@@ -77,7 +77,7 @@ function ProfileCard({
         // backgroundImage: "url('/assets/png/id_bg.jpg')",
         touchAction: "none",
       }}
-      className="bg-cover bg-top bg-gradient-to-br  from-primary-900/80 via-primary-700/80 to-primary-900/80 backdrop-blur-sm border-secondary-500/50 border-1"
+      className="border-1 border-secondary-500/50 bg-gradient-to-br from-primary-900/80 via-primary-700/80 to-primary-900/80 bg-cover bg-top backdrop-blur-sm"
       onTouchStartCapture={handlePointerDown}
       onTouchEndCapture={handlePointerUp}
     >
@@ -101,28 +101,28 @@ function Intermediate({
         <Environment>
           <Lightformer
             intensity={2}
-            color="white"
+            color="gold"
             position={[0, -1, 5]}
             rotation={[0, 0, Math.PI / 3]}
             scale={[100, 0.1, 1]}
           />
           <Lightformer
             intensity={3}
-            color="white"
+            color="gold"
             position={[-1, -1, 1]}
             rotation={[0, 0, Math.PI / 3]}
             scale={[100, 0.1, 1]}
           />
           <Lightformer
             intensity={3}
-            color="white"
+            color="gold"
             position={[1, 1, 1]}
             rotation={[0, 0, Math.PI / 3]}
             scale={[100, 0.1, 1]}
           />
           <Lightformer
             intensity={10}
-            color="white"
+            color="gold"
             position={[-10, 0, 14]}
             rotation={[0, Math.PI / 2, Math.PI / 3]}
             scale={[100, 10, 1]}
@@ -153,8 +153,10 @@ function Band({
     angularDamping: 2,
     linearDamping: 2,
   };
-  const { nodes, materials } = useGLTF("/2025/3d/profile_tag.glb") as BadgeGLTF;
-  const texture = useTexture("/2025/badgelogo.png");
+  const { nodes, materials } = useGLTF(
+    CONSTANT.ASSETS["3D"].PROFILETAG,
+  ) as BadgeGLTF;
+  const texture = useTexture(CONSTANT.ASSETS.PUBLIC.TAG_LOGO);
   const { width, height } = useThree((state) => state.size);
   const [curve] = useState(
     () =>
@@ -264,7 +266,7 @@ function Band({
     <>
       <group position={[0, 4, 0]}>
         <RigidBody
-        position={[0, .5, 0]}
+          position={[0, 0.5, 0]}
           ref={fixed}
           {...segmentProps}
           type="fixed"
@@ -373,7 +375,9 @@ function Band({
                         justifyContent="center"
                       >
                         <ThreeImage
-                          src={user.profileImage ?? "assets/png/ryoko.png"}
+                          src={
+                            user.profileImage ?? CONSTANT.ASSETS.PUBLIC.RYOKO
+                          }
                           width={130}
                           aspectRatio={0.7}
                           borderRadius={6}
@@ -391,7 +395,7 @@ function Band({
                         flexGrow={1}
                       >
                         <Text
-                          fontSize={28}
+                          fontSize={26}
                           fontWeight="bold"
                           transformScaleY={1.4}
                           color="white"
@@ -400,7 +404,7 @@ function Band({
                           marginLeft={5}
                           marginRight={5}
                         >
-                          {truncateText(user.name,20)}
+                          {truncateText(user.name, 20)}
                         </Text>
                         <Text
                           overflow={"hidden"}
@@ -411,7 +415,7 @@ function Band({
                           marginLeft={5}
                           marginRight={5}
                         >
-                          {truncateText(user.college?.name ?? "",40)}
+                          {truncateText(user.college?.name ?? "", 40)}
                         </Text>
 
                         <Text
@@ -447,7 +451,7 @@ function Band({
                       />
 
                       <Text
-                        fontSize={16}
+                        fontSize={28}
                         fontWeight="bold"
                         transformScaleY={1.4}
                         color="white"
@@ -469,7 +473,7 @@ function Band({
         </RigidBody>
       </group>
       <mesh ref={band}>
-        <meshLineGeometry/>
+        <meshLineGeometry />
         <meshLineMaterial
           color="white"
           depthTest={false}
@@ -484,7 +488,7 @@ function Band({
   );
 }
 
-useGLTF.preload("/2025/3d/profile_tag.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].PROFILETAG);
 extend({ MeshLineGeometry, MeshLineMaterial });
 
 declare module "@react-three/fiber" {

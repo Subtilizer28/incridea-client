@@ -1,14 +1,15 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
-import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { useGLTF } from "@react-three/drei";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Vector3 } from "three";
+
+import stonesData from "~/components/explore_2025/data/data.json";
+import { CONSTANT } from "~/constants";
 
 type Stone = {
   id: number;
   pos: [number, number, number];
 };
-
-import stonesData from "~/components/explore_2025/data/data.json";
 
 const stones: Stone[] = stonesData.stones.map((stone) => ({
   ...stone,
@@ -100,7 +101,7 @@ type GLTFResult = {
 
 const Blue_Stone: React.FC<BlueStoneProps> = (props) => {
   const { nodes, materials } = useGLTF(
-    "/2025/assets/explore/models/blue_stone.glb",
+    CONSTANT.ASSETS["3D"].BLUE_STONE,
   ) as unknown as GLTFResult;
 
   return (
@@ -117,6 +118,6 @@ const Blue_Stone: React.FC<BlueStoneProps> = (props) => {
   );
 };
 
-useGLTF.preload("/2025/assets/explore/models/blue_stone.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].BLUE_STONE);
 
 export default Poi;

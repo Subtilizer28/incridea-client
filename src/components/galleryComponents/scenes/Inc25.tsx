@@ -4,37 +4,40 @@ import Modal from "../gallery-modal";
 import PreviewComponent from "../previewComponent/preview-component";
 import Link from "next/link";
 import Image from "next/image";
+import { CONSTANT } from "~/constants";
 
 const Inc25 = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeModal, setActiveModal] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const animationRef = useRef<gsap.core.Timeline | null>(null);
+  const isVisibleRef = useRef(true);
 
   const afterMovies = useMemo(
     () => [
       [
-        "/2025/gallery/thumbnails/incridea18.webp",
+        CONSTANT.ASSETS.GALLERY.THUMBNAIL18,
         "https://www.youtube.com/embed/GqqK4c2rDhM?autoplay=1&playsinline=1&rel=0&fs=1&controls=1&mute=1",
       ],
       [
-        "/2025/gallery/thumbnails/incridea19.webp",
+        CONSTANT.ASSETS.GALLERY.THUMBNAIL19,
         "https://www.youtube.com/embed/gmF72fu1w6A?autoplay=1&playsinline=1&rel=0&fs=1&controls=1&mute=1",
       ],
       [
-        "/2025/gallery/thumbnails/incridea20.webp",
+        CONSTANT.ASSETS.GALLERY.THUMBNAIL20,
         "https://www.youtube.com/embed/w0phDNAnUgA?autoplay=1&playsinline=1&rel=0&fs=1&controls=1&mute=1",
       ],
       [
-        "/2025/gallery/thumbnails/incridea22.webp",
+        CONSTANT.ASSETS.GALLERY.THUMBNAIL22,
         "https://www.youtube.com/embed/JHgT5PzLc4Q?autoplay=1&playsinline=1&rel=0&fs=1&controls=1&mute=1",
       ],
       [
-        "/2025/gallery/thumbnails/incridea23.webp",
+        CONSTANT.ASSETS.GALLERY.THUMBNAIL23,
         "https://www.youtube.com/embed/8Veb3u0xEoE?autoplay=1&playsinline=1&rel=0&fs=1&controls=1&mute=1",
       ],
       [
-        "/2025/gallery/thumbnails/incridea24.webp",
+        CONSTANT.ASSETS.GALLERY.THUMBNAIL24,
         "https://www.youtube.com/embed/YoWeuaSMytk?autoplay=1&playsinline=1&rel=0&fs=1&controls=1&mute=1",
       ],
     ],
@@ -51,14 +54,13 @@ const Inc25 = () => {
   }, []);
 
   const updateOpacity = useCallback(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !isVisibleRef.current) return;
 
     const elements = Array.from(containerRef.current.children) as HTMLElement[];
     const rotationY = Number(
       gsap.getProperty(containerRef.current, "rotationY"),
     );
 
-    // Batch DOM updates
     requestAnimationFrame(() => {
       elements.forEach((element, i) => {
         const elementRotationY = (rotationY + i * 60) % 360;
@@ -71,27 +73,52 @@ const Inc25 = () => {
     });
   }, []);
 
+  // Handle visibility changes
   useEffect(() => {
-    let animationID: gsap.core.Timeline | null = null;
+    const handleVisibilityChange = () => {
+      isVisibleRef.current = document.visibilityState === "visible";
 
+      if (animationRef.current) {
+        if (isVisibleRef.current) {
+          animationRef.current.resume();
+        } else {
+          animationRef.current.pause();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
     const animate = () => {
       if (containerRef.current) {
-        animationID = gsap.timeline({
+        animationRef.current = gsap.timeline({
           repeat: -1,
           onUpdate: updateOpacity,
         });
 
-        animationID.to(containerRef.current, {
+        animationRef.current.to(containerRef.current, {
           rotationY: "+=360",
-          duration: isMobile ? 45 : 35, // Slower rotation on mobile
+          duration: isMobile ? 45 : 35,
           ease: "linear",
         });
+
+        // Initial pause if page is not visible
+        if (!isVisibleRef.current) {
+          animationRef.current.pause();
+        }
       }
     };
 
     animate();
     return () => {
-      animationID?.kill();
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
     };
   }, [updateOpacity, isMobile]);
 
@@ -132,10 +159,13 @@ const Inc25 = () => {
             className="px-6 text-lg rounded-full text-white flex justify-center items-center font-semibold cursor-pointer"
           >
             Visit&nbsp;&nbsp;
-            <img
-              src="/2025/gallery/capture-logo.png"
+            <Image
+              src={CONSTANT.ASSETS.GALLERY.CAPTURELOGO}
               alt="Capture"
+              width={80}
+              height={24}
               className="h-6 cursor-pointer"
+              priority
             />
           </Link>
         </div>

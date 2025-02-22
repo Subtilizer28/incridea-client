@@ -45,36 +45,41 @@ const QuizImageUpload = React.memo(
           body: JSON.stringify({ url }),
         },
       );
+
+      if (res.ok) {
+        toast.success("Image deleted", { position: "bottom-right" });
+      } else {
+        toast.error("Image deletion failed", { position: "bottom-right" });
+      }
     };
 
     return (
       <>
         <div
-          className={`flex grow items-center justify-center rounded-b-md md:rounded-md ${
-            highlighted ? "bg-blue/20 ring-2 ring-amber-500" : "bg-black/20"
-          }`}
-          // onClick={() => {
-          //   inputRef.current?.click();
-          // }}
-          // onDragOver={(e) => {
-          //   e.preventDefault();
-          //   setHighlighted(true);
-          // }}
-          // onDragLeave={(e) => {
-          //   e.preventDefault();
-          //   setHighlighted(false);
-          // }}
-          // onDrop={(e) => {
-          //   e.preventDefault();
-          //   setHighlighted(false);
+          className={`flex grow items-center justify-center rounded-b-md md:rounded-md ${highlighted ? "bg-blue/20 ring-2 ring-amber-500" : "bg-black/20"
+            }`}
+        // onClick={() => {
+        //   inputRef.current?.click();
+        // }}
+        // onDragOver={(e) => {
+        //   e.preventDefault();
+        //   setHighlighted(true);
+        // }}
+        // onDragLeave={(e) => {
+        //   e.preventDefault();
+        //   setHighlighted(false);
+        // }}
+        // onDrop={(e) => {
+        //   e.preventDefault();
+        //   setHighlighted(false);
 
-          //   const droppedFile = Array.from(e.dataTransfer.files);
+        //   const droppedFile = Array.from(e.dataTransfer.files);
 
-          //   if (droppedFile[0]) {
-          //     // setImage(droppedFile[0]);
-          //     setMediaPreview(URL.createObjectURL(droppedFile[0]));
-          //   }
-          // }}
+        //   if (droppedFile[0]) {
+        //     // setImage(droppedFile[0]);
+        //     setMediaPreview(URL.createObjectURL(droppedFile[0]));
+        //   }
+        // }}
         >
           {loading || manualLoading ? (
             <>

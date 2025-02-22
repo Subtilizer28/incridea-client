@@ -28,6 +28,7 @@ export const env = createEnv({
     // This is a shared secret between the server and the client.
     // It's used to introspect graphql schema.
     SCHEMA_TOKEN: z.string(),
+    UPLOADTHING_TOKEN: z.string(),
   },
 
   /**
@@ -46,6 +47,7 @@ export const env = createEnv({
       .transform((val) => val === "true"),
     NEXT_PUBLIC_SERVER_HTTP_URL: z.string().url(),
     NEXT_PUBLIC_SERVER_WEBSOCKET_URL: z.string().url(),
+    NEXT_PUBLIC_THIS_APP_URL: z.string().url(),
     NEXT_PUBLIC_UPLOADTHING_URL: z.string().url(),
     NEXT_PUBLIC_RAZORPAY_KEY: z.string(),
     NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: z.string(),
@@ -59,6 +61,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     SCHEMA_TOKEN: process.env.SCHEMA_TOKEN,
     NEXT_PUBLIC_RAZORPAY_KEY: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
     NEXT_PUBLIC_NODE_ENV: process.env.NODE_ENV,
@@ -66,6 +69,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SERVER_HTTP_URL: process.env.NEXT_PUBLIC_SERVER_HTTP_URL,
     NEXT_PUBLIC_SERVER_WEBSOCKET_URL:
       process.env.NEXT_PUBLIC_SERVER_WEBSOCKET_URL,
+    NEXT_PUBLIC_THIS_APP_URL: process.env.NEXT_PUBLIC_THIS_APP_URL,
     NEXT_PUBLIC_UPLOADTHING_URL: process.env.NEXT_PUBLIC_UPLOADTHING_URL,
     NEXT_PUBLIC_GOOGLE_ANALYTICS_ID:
       process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID,
@@ -80,4 +84,10 @@ export const env = createEnv({
    * `SOME_VAR=''` will throw an error.
    */
   emptyStringAsUndefined: true,
+
+  onInvalidAccess: (variable) => {
+    throw new Error(
+      "❌ Attempted to access a server-side environment variable on the client: " + variable,
+    );
+  },
 });

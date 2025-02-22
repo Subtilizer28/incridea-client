@@ -1,21 +1,22 @@
 import { useQuery } from "@apollo/client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 import Button from "~/components/button";
-import { GetUserXpDocument } from "~/generated/generated";
+import { CONSTANT } from "~/constants";
+import { GetStoneVisibilitiesDocument } from "~/generated/generated";
 import { useAuth } from "~/hooks/useAuth";
 
-import MainMenuModal from "./mainMenuModal";
-
 export default function ExploreNav() {
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const { user } = useAuth();
-  const { data: userXp, loading: userXpLoading } = useQuery(
-    GetUserXpDocument,
+  const { data: userStones, loading: userStonesLoading } = useQuery(
+    GetStoneVisibilitiesDocument,
     {},
   );
-  const [xp, setXp] = useState<number>(0);
+  const [stones, setStones] = useState<string>("111111");
 
   useEffect(() => {
     const handleOnEscapeDown = (e: KeyboardEvent) => {
@@ -30,12 +31,32 @@ export default function ExploreNav() {
   }, [showModal]);
 
   useEffect(() => {
-    if (userXp?.getUserXp.__typename === "QueryGetUserXpSuccess")
-      setXp(
-        userXp.getUserXp.data.reduce((acc, curr) => acc + curr.level.point, 0),
-      );
-    else setXp(0);
-  }, [userXpLoading, userXp]);
+    if (
+      userStones?.getStoneVisibilities.__typename ===
+      "QueryGetStoneVisibilitiesSuccess"
+    ) {
+      const str = userStones.getStoneVisibilities.data; // Ensure this exists
+      if (str) {
+        const boolArray = str
+          .slice(0, 6)
+          .split("")
+          .map((char) => char === "1");
+        localStorage.setItem("stoneVisibility", JSON.stringify(boolArray));
+      }
+    }
+
+    const interval = setInterval(() => {
+      const storedVisibility = localStorage.getItem("stoneVisibility");
+      if (storedVisibility) {
+        const parsedVisibility = JSON.parse(storedVisibility) as boolean[];
+        const total = parsedVisibility.length;
+        const collected = parsedVisibility.filter((v) => !v).length;
+        setStones(`${collected}/${total}`);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [userStonesLoading, userStones]);
 
   return (
     <>
@@ -43,14 +64,14 @@ export default function ExploreNav() {
         {user ? (
           <div className="flex flex-row items-center space-x-1 text-white">
             <Image
-              src={"/assets/png/XP.png"}
+              src={CONSTANT.ASSETS.EXPLORE.STONE}
               width={100}
               height={100}
               alt="map"
               className="h-8 w-8 sm:h-10 sm:w-10"
             />
 
-            <p className="relative font-sans text-xl">{xp}</p>
+            <p className="relative text-xl">{stones}</p>
           </div>
         ) : (
           <div></div>
@@ -59,13 +80,13 @@ export default function ExploreNav() {
           intent={"primary"}
           size={"medium"}
           onClick={() => {
-            setShowModal(true);
+            // setShowModal(true);
+            void router.push("/");
           }}
         >
-          Menu
+          Home
         </Button>
       </div>
-      <MainMenuModal showModal={showModal} setShowModal={setShowModal} />
     </>
   );
 }

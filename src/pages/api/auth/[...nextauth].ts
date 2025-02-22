@@ -45,23 +45,26 @@ declare module "next-auth" {
   }
 }
 
-export const refreshToken = async function (token: string) {
-  console.log("refreshing token", token);
+declare module "next-auth/jwt" {
+  export interface JWT {
+    accessToken: string;
+    refreshToken: string;
+  }
+}
+
+const refreshToken = async ({ oldRefreshToken }: { oldRefreshToken: string }) => {
   const { data } = await client.mutate({
     mutation: RefreshTokenDocument,
     variables: {
-      refreshToken: token,
+      refreshToken: oldRefreshToken,
     },
   });
-  console.log("refreshToken", data);
-  if (data?.refreshToken.__typename === "MutationRefreshTokenSuccess") {
-    return [
-      data.refreshToken.data.accessToken,
-      data.refreshToken.data.refreshToken,
-    ];
-  }
-  console.log("refreshToken failed");
-  return [null, null];
+  if (!data || data.refreshToken.__typename === "Error")
+    return [null, null] as const;
+  return [
+    data.refreshToken.data.accessToken,
+    data.refreshToken.data.refreshToken,
+  ] as const
 };
 
 export default NextAuth({
@@ -122,37 +125,30 @@ export default NextAuth({
       // user was signed in previously, we want to check if the token needs refreshing
       // token has been invalidated, try refreshing it
 
-      if (isJwtExpired(String(token.accessToken))) {
-        console.log("expired, refreshing token");
+      if (isJwtExpired(token.accessToken)) {
+        console.log("Token expired, refreshing token for:", token.refreshToken);
+
         const [newAccessToken, newRefreshToken] = await refreshToken(
-          String(token.refreshToken),
+          { oldRefreshToken: token.refreshToken }
         );
-        console.log(
-          "newAccessToken",
-          newAccessToken,
-          "newRefreshToken",
-          newRefreshToken,
-        );
-        console.log("old token", token);
 
-        if (newAccessToken && newRefreshToken) {
-          token = {
-            ...token,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-            exp: getRefreshTokenExpiry(newRefreshToken),
-          };
-          console.log("token-new-token-attached", token);
-
-          return token;
+        if (!newAccessToken || !newRefreshToken) {
+          console.log("Refreshing token failed for: ", token.refreshToken);
+          return token
         }
 
-        // unable to refresh tokens from backend, invalidate the token
-        console.log(
-          "unable to refresh tokens from backend, invalidate the token",
-        );
+        console.log("Refreshed tokens for: ", token.refreshToken, " are: \naccessToken: ", newAccessToken, "\nrefreshToken: ", newRefreshToken);
+
+        token = {
+          ...token,
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+          exp: getRefreshTokenExpiry(newRefreshToken),
+        };
+
         return token;
       }
+
       // token.data = await fetchUser(token.accessToken as string);
       console.log("token-data-attached", token);
       return token;

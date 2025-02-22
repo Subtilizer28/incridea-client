@@ -75,7 +75,7 @@ const AccommodationForm: FunctionComponent = () => {
           setShowModal={setShowModal}
         />
       )}
-      <div className="mb-4 mt-10 h-max min-w-[350px] max-w-[350px] rounded-md bg-[#561e98] px-6 py-8 text-accent-200 transition-all ease-suck-in md:min-w-[450px] md:max-w-[450px]">
+      <div className="mb-4 mt-10 h-max min-w-[350px] max-w-[350px] rounded-md bg-primary-800 px-6 py-8 text-accent-200 transition-all ease-suck-in md:min-w-[450px] md:max-w-[450px]">
         {accommodationLoading ? (
           <div className="flex w-full flex-col md:flex-row">
             <Spinner className="text-[#dd5c6e]" intent={"white"} />
@@ -189,7 +189,7 @@ const AccommodationForm: FunctionComponent = () => {
             <div>
               <label className="mb-2 block text-sm text-white">Upload ID</label>
               <UploadButton
-                endpoint="accomodation"
+                endpoint="accommodation"
                 onUploadBegin={() => {
                   setUploading(true);
                 }}

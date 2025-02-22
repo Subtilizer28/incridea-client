@@ -1,12 +1,16 @@
 import gsap from "gsap";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { CONSTANT } from "~/constants";
+import { Role } from "~/generated/generated";
 import { useLerpRef } from "~/hooks/use-lerp-ref";
 import { useTimeline } from "~/hooks/use-timeline";
 import { useTrackDragInertia } from "~/hooks/use-track-drag";
 import { useWheel } from "~/hooks/use-wheel";
 import { mod } from "~/lib/math";
-import Image from "next/image";
-import Link from "next/link";
 
 interface NavItemProps {
   active: boolean;
@@ -18,70 +22,44 @@ const links: {
   label: string;
   href: string;
 }[] = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "Explore",
-    href: "/explore",
-  },
-  {
-    label: "Events",
-    href: "/events",
-  },
-  {
-    label: "Sponsors",
-    href: "/sponsors",
-  },
-  {
-    label: "Pronites",
-    href: "/pronites",
-  },
-  {
-    label: "About",
-    href: "/about",
-  },
+  { label: "Home", href: "/" },
+  { label: "Explore", href: "/explore" },
+  { label: "Events", href: "/events" },
+  // { label: "Sponsors", href: "/sponsors" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Pronites", href: "/pronites" },
+  { label: "About", href: "/about" },
 ];
-const REPS = 6;
+
+const REPS = 4;
 const DISPLAY_LINKS_LENGTH = links.length * REPS;
 const TWO_PI = Math.PI * 2;
 
 const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
   const itemRef = useRef<HTMLLIElement>(null);
 
-  const inTimeline = useTimeline(() => {
+  const animationTimeline = useTimeline(() => {
     const selector = gsap.utils.selector(itemRef.current);
     const tl = gsap.timeline({
       paused: true,
     });
 
-    tl.set(selector("#item-arrow-wrapper"), {
-      opacity: 1,
-      x: -25,
-    })
-      .set(selector("#item-arrow"), {
-        opacity: 0,
-        x: -20,
-        scale: 1,
-        rotate: 0,
-      })
-      .set(selector("#item-border"), {
-        scale: 0.8,
-        rotateX: 120,
-        rotateY: 90,
-        force3D: true,
-        transformPerspective: 600,
-        opacity: 0,
-      })
-      .to(
+    tl.set(
+      [
         selector("#item-arrow-wrapper"),
-        {
-          x: 0,
-          duration: 0.9,
-        },
-        "<",
-      )
+        selector("#item-arrow"),
+        selector("#item-border"),
+      ],
+      {
+        opacity: 0,
+      },
+    );
+
+    tl.to(selector("#item-arrow-wrapper"), {
+      opacity: 1,
+      x: 0,
+      duration: 0.9,
+    })
       .to(
         selector("#item-border"),
         {
@@ -90,6 +68,8 @@ const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
           opacity: 1,
           rotateX: 0,
           rotateY: 0,
+          force3D: true,
+          transformPerspective: 600,
         },
         "<",
       )
@@ -97,8 +77,11 @@ const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
         selector("#item-arrow"),
         {
           opacity: 1,
-          ease: "back.out(2)",
           x: 0,
+          scale: 1,
+          rotate: 0,
+          ease: "back.out(2)",
+          duration: 0.5,
         },
         ">",
       );
@@ -106,63 +89,32 @@ const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
     return tl;
   }, []);
 
-  const outTimeline = useTimeline(() => {
-    const selector = gsap.utils.selector(itemRef.current);
-    const tl = gsap.timeline({
-      paused: true,
-    });
-
-    tl.to(selector("#item-border"), {
-      duration: 0.5,
-      scale: 0.8,
-      opacity: 0,
-    })
-      .to(
-        selector("#item-arrow"),
-        {
-          duration: 0.5,
-          opacity: 0,
-          scale: 0.8,
-          rotate: -180,
-          ease: "back.in(2)",
-        },
-        "<",
-      )
-      .set(selector("#item-arrow-wrapper"), {
-        opacity: 0,
-      });
-
-    return tl;
-  }, []);
-
   useEffect(() => {
+    if (!animationTimeline) return;
+
     if (active) {
-      outTimeline?.pause();
-      inTimeline?.invalidate();
-      inTimeline?.restart();
+      animationTimeline.play();
     } else {
-      inTimeline?.pause();
-      outTimeline?.invalidate();
-      outTimeline?.restart();
+      animationTimeline.reverse();
     }
-  }, [active, inTimeline, outTimeline]);
+  }, [active, animationTimeline]);
 
   return (
     <li
-      className="absolute group font-life-craft left-1/2 top-1/2 origin-left nav-item text-em-[54/16] pointer-events-auto"
+      className="nav-item text-em-[54/16] group pointer-events-auto absolute left-1/2 top-1/2 origin-left font-life-craft"
       ref={itemRef}
     >
       <a href={href}>
         <div className="flex items-center gap-x-4">
-          <span className="sm:text-6xl text-5xl text-white">{label}</span>
+          <span className="text-5xl text-white sm:text-6xl">{label}</span>
 
           <div
             id="item-arrow-wrapper"
-            className="relative p-2.5 opacity-0 rounded-full overflow-hidden"
+            className="relative overflow-hidden rounded-full p-2.5 opacity-0"
           >
             <span
               id="item-border"
-              className="absolute top-0 left-0 w-full h-full"
+              className="absolute left-0 top-0 h-full w-full"
             >
               <svg width="100%" viewBox="0 0 25 25">
                 <circle
@@ -187,7 +139,7 @@ const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
                   }
                   strokeDasharray="var(--dash-array)"
                   strokeDashoffset="var(--dash-array)"
-                  className="group-hover:[stroke-dashoffset:0] transition-[stroke-dashoffset] duration-500 ease-in-out"
+                  className="transition-[stroke-dashoffset] duration-500 ease-in-out group-hover:[stroke-dashoffset:0]"
                 />
               </svg>
             </span>
@@ -198,7 +150,7 @@ const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
                 viewBox="0 0 25 25"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="transition-[opacity_transform] duration-500 ease-in-out translate-x-0 opacity-100 group-hover:opacity-0 group-hover:translate-x-full"
+                className="translate-x-0 opacity-100 transition-[opacity_transform] duration-500 ease-in-out group-hover:translate-x-full group-hover:opacity-0"
               >
                 <path
                   d="M20.5 12.5H4.5M20.5 12.5L13.5 5.5M20.5 12.5L13.5 19.5"
@@ -209,7 +161,7 @@ const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
                 />
               </svg>
               <svg
-                className="absolute inline-block top-0 left-0 transition-[opacity_transform] duration-500 ease-in-out -translate-x-full opacity-0 group-hover:opacity-100 group-hover:translate-x-0"
+                className="absolute left-0 top-0 inline-block -translate-x-full opacity-0 transition-[opacity_transform] duration-500 ease-in-out group-hover:translate-x-0 group-hover:opacity-100"
                 width="32"
                 viewBox="0 0 25 25"
                 fill="none"
@@ -231,7 +183,28 @@ const NavItem: React.FC<NavItemProps> = ({ active, label, href }) => {
   );
 };
 
-const MobileNav: React.FC = () => {
+const MobileNav = ({
+  user,
+}: {
+  user:
+    | {
+        __typename?: "User";
+        createdAt: Date;
+        email: string;
+        id: string;
+        isVerified: boolean;
+        name: string;
+        phoneNumber?: string | null;
+        role: Role;
+        profileImage?: string | null;
+        college?: {
+          __typename?: "College";
+          id: string;
+          name: string;
+        } | null;
+      }
+    | undefined;
+}) => {
   const radius = 700;
   const factorX = 0.8;
   const factorY = 1;
@@ -405,6 +378,9 @@ const MobileNav: React.FC = () => {
     [ANGLE_STEP, INITIAL_OFFSET, factorX, factorY, radius],
   );
 
+  const router = useRouter();
+  const pathname = router.pathname;
+
   return (
     <>
       <nav
@@ -412,13 +388,13 @@ const MobileNav: React.FC = () => {
           clipPath:
             "polygon(3% 0%, 97% 0%, 100% 50%, 97% 100%, 3% 100%, 0% 50%)",
         }}
-        className="fixed w-screen top-4 bg-white/10 backdrop-blur-2xl h-16 flex md:hidden justify-between items-center px-6 z-40"
+        className="fixed top-4 z-40 flex h-16 w-screen items-center justify-between bg-white/10 px-6 backdrop-blur-2xl lg:hidden"
       >
         <Link href="/">
           {isClient && (
             <Image
               className="w-24 transition-opacity hover:opacity-75"
-              src={`/2025/logo.png`}
+              src={CONSTANT.ASSETS.PUBLIC.LOGO_BLACK}
               alt="Logo"
               width={100}
               height={80}
@@ -458,9 +434,9 @@ const MobileNav: React.FC = () => {
               "radial-gradient(circle at -50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 100%)",
             position: "fixed",
           }}
-          className="fixed z-[9999999] w-full h-[100svh]"
+          className="fixed z-[9999999] h-[100svh] w-full"
         >
-          <div className="relative w-full h-full">
+          <div className="relative h-full w-full">
             {" "}
             {/* Add this wrapper */}
             <ul
@@ -491,14 +467,110 @@ const MobileNav: React.FC = () => {
                   );
                 })}
             </ul>
+            {user && (
+              <Link
+                href={
+                  !user
+                    ? "/login"
+                    : user.role === Role.User
+                      ? "/register"
+                      : pathname === "/profile"
+                        ? user.role !== Role.Participant
+                          ? "/dashboard"
+                          : "/"
+                        : "/profile"
+                }
+              >
+                <div className="absolute right-8 top-8 z-10 max-w-max p-3.5">
+                  {pathname === "/profile" ? (
+                    user?.role !== Role.Participant ? (
+                      <>
+                        <span
+                          id="dashboard-border"
+                          className="absolute left-0 top-0 h-full w-full rounded-full border-2 border-zinc-800"
+                        />
+                        <svg
+                          id="dashboard-icon"
+                          width="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect x="3" y="3" width="7" height="7" fill="white" />
+                          <rect
+                            x="14"
+                            y="3"
+                            width="7"
+                            height="7"
+                            fill="white"
+                          />
+                          <rect
+                            x="3"
+                            y="14"
+                            width="7"
+                            height="7"
+                            fill="white"
+                          />
+                          <rect
+                            x="14"
+                            y="14"
+                            width="7"
+                            height="7"
+                            fill="white"
+                          />
+                        </svg>
+                      </>
+                    ) : (
+                      <>
+                        <span
+                          id="home-border"
+                          className="absolute left-0 top-0 h-full w-full rounded-full border-2 border-zinc-800"
+                        />
+                        <svg
+                          id="home-icon"
+                          width="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"
+                            fill="white"
+                          />
+                        </svg>
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <span
+                        id="profile-border"
+                        className="absolute left-0 top-0 h-full w-full rounded-full border-2 border-zinc-800"
+                      />
+                      <svg
+                        id="profile-icon"
+                        width="32"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                          fill="white"
+                        />
+                      </svg>
+                    </>
+                  )}
+                </div>
+              </Link>
+            )}
             <button
               id="close"
               onClick={() => setOpen((v) => !v)}
-              className="absolute z-10 p-3.5 max-lg:bottom-8 lg:-translate-x-1/2 max-lg:right-8 lg:left-1/2 lg:top-1/2 max-w-max lg:-translate-y-1/2"
+              className="absolute z-10 max-w-max p-3.5 max-lg:bottom-8 max-lg:right-8 lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2"
             >
               <span
                 id="close-border"
-                className="absolute top-0 left-0 w-full h-full border-2 rounded-full border-zinc-800"
+                className="absolute left-0 top-0 h-full w-full rounded-full border-2 border-zinc-800"
               />
               <svg
                 id="close-icon"

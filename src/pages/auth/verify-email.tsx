@@ -1,13 +1,15 @@
-import { type NextPage } from "next";
 
-import VerifyEmailComponent from "~/components/form/verifyEmail";
+import VerifyEmail from "~/components/form/verifyEmail";
+import LoginLayout from "~/components/layout/login";
 
-const VerifyEmail: NextPage = () => {
+const Page = () => {
   return (
-    <div className="flex h-screen items-center justify-center">
-      <VerifyEmailComponent />
-    </div>
+    <LoginLayout >
+      <div className="size-full relative">
+        <VerifyEmail />
+      </div>
+    </LoginLayout >
   );
 };
 
-export default VerifyEmail;
+export default Page;

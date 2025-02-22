@@ -1,24 +1,28 @@
 import { generateUploadDropzone } from "@uploadthing/react";
 import { getSession } from "next-auth/react";
-import { type ComponentProps } from "react";
+import { memo, type ComponentProps } from "react";
 
 import { env } from "~/env";
+import { type UploadRouter } from "~/server/uploadthing/router";
 
-const UploadDropzone = (
-  props: ComponentProps<ReturnType<typeof generateUploadDropzone>>,
-) => {
-  const Comp = generateUploadDropzone({
-    url: `${env.NEXT_PUBLIC_SERVER_HTTP_URL}/uploadthing`,
-  });
+const InternalUploadDropzone = generateUploadDropzone<UploadRouter>({
+  url: `${env.NEXT_PUBLIC_THIS_APP_URL}/api/uploadthing`,
+});
 
-  return (
-    <Comp
-      {...props}
-      headers={async () => ({
-        Authorization: (await getSession())?.accessToken ?? "",
-      })}
-    />
-  );
-};
+const UploadDropzone = memo((
+  props: ComponentProps<typeof InternalUploadDropzone> & {
+    customId?: string;
+  },
+) => (
+  <InternalUploadDropzone
+    {...props}
+    headers={async () => ({
+      Authorization: (await getSession())?.accessToken ?? "",
+      ...(props.customId ? { custom_id: props.customId } : {}),
+    })}
+  />
+))
+
+UploadDropzone.displayName = "UploadDropzone";
 
 export { UploadDropzone };

@@ -6,7 +6,8 @@ import { Toaster } from "react-hot-toast";
 import AccommodateTab from "~/components/general/dashboard/accommodate/accomodateTab";
 import Dashboard from "~/components/layout/dashboard";
 import Spinner from "~/components/spinner";
-import { AccommodationRequestsDocument } from "~/generated/generated";
+import { CONSTANT } from "~/constants";
+import { AccommodationRequestsDocument, Role } from "~/generated/generated";
 import { useAuth } from "~/hooks/useAuth";
 
 const Accommodate: NextPage = () => {
@@ -29,10 +30,16 @@ const Accommodate: NextPage = () => {
   }
 
   // 2. Redirect to profile if user is not a admin
-  // if (user && user.role !== 'ADMIN') router.push('/profile');
-  // 2. Redirect to profile if user is not a accommodation committee member
-  if (data?.accommodationRequests.__typename === "Error")
+  if (user && user.role !== Role.Admin && !CONSTANT.PID.ACCOMMODATION_TEAM.includes(Number(user.id))) {
+    void router.push('/profile');
+    return <div>Redirecting...</div>
+  }
+
+  // 3. Redirect to profile if user is not a accommodation committee member
+  if (data?.accommodationRequests.__typename === "Error") {
     void router.push("/profile");
+    return <div>Redirecting...</div>;
+  }
 
   return (
     <Dashboard>

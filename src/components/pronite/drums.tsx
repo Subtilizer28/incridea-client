@@ -4,12 +4,13 @@
 
 import React, { useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
+import { CONSTANT } from "~/constants";
 
-useGLTF.preload("/2025/pronites/drums.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].DRUMS);
 
 export default function Drums(props) {
   const group = useRef();
-  const { nodes, materials, animations } = useGLTF("/2025/Pronites/drums.glb");
+  const { nodes, materials, animations } = useGLTF(CONSTANT.ASSETS["3D"].DRUMS);
   const { actions } = useAnimations(animations, group);
 
   // Start the first animation once the component mounts.

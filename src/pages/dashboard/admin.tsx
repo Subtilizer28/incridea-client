@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
-import { Toaster } from "react-hot-toast";
 
 import AdminTab from "~/components/general/dashboard/admin/adminTab";
 import Dashboard from "~/components/layout/dashboard";
@@ -13,25 +12,27 @@ const Admin: NextPage = () => {
   const { user, loading } = useAuth();
 
   if (loading)
-    return (
+    return (<Dashboard>
       <div className="flex h-screen w-screen justify-center">
         <Spinner />
       </div>
+    </Dashboard >
     );
 
   // 1. Redirect to login if user is not logged in
   if (!user) {
     void router.push("/login");
-    return <div>Redirecting...</div>;
+    return <Dashboard><div>Redirecting...</div></ Dashboard>;
   }
 
   // 2. Redirect to profile if user is not a admin
-  if (user && user.role !== Role.Admin) void router.push("/profile");
+  if (user && user.role !== Role.Admin) {
+    void router.push("/profile");
+    return <Dashboard><div>Redirecting...</div></ Dashboard>;
+  }
 
   return (
     <Dashboard>
-      <Toaster />
-      {/* Welcome Header */}
       <h1 className="mb-3 text-4xl">
         Welcome <span className="font-semibold">{user?.name}</span>!
       </h1>

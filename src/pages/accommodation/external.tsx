@@ -6,6 +6,8 @@ import { TbArrowBackUp } from "react-icons/tb";
 
 import Button from "~/components/button";
 import Loader from "~/components/loader";
+import { CONSTANT } from "~/constants";
+import { ASSETS } from "~/constants/assets";
 import { useAuth } from "~/hooks/useAuth";
 
 const Accommodation: NextPage = () => {
@@ -13,12 +15,26 @@ const Accommodation: NextPage = () => {
   const { user, loading } = useAuth();
 
   if (loading) return <Loader />;
-  if (!user) void void router.push("/login");
-  if (user?.college?.id == "1") void void router.push("/profile");
+  if (!user) {
+
+    void router.push("/login");
+    return <>
+      Redirecting...
+    </>
+  }
+
+  if (user.college?.id == `${CONSTANT.NMAMIT_COLLEGE_ID}`) {
+
+    void router.push("/profile");
+    void router.push("/login");
+    return <>
+      Redirecting...
+    </>
+  }
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-b from-primary-300 to-primary-500 px-4 pb-10 pt-32 text-white md:px-6">
+      <div className="min-h-screen px-4 pb-10 pt-32 text-white md:px-6">
         <div className="mx-auto max-w-4xl">
           <div className="p-4">
             <Link href="/accommodation">
@@ -55,15 +71,15 @@ const Accommodation: NextPage = () => {
               </li>
               <li>
                 For any further clarifications regarding the same and transport
-                from the place of accommodation, contact: +918747960666,
-                +918618378701{" "}
+                from the place of accommodation, contact: +918618378701, +919611878045{" "}
               </li>
               <li>
                 External Accommodation Details:{" "}
                 <Link
-                  href="https://docs.google.com/spreadsheets/d/1Y2QheAsJjUr54LAvzXVVJjIGFXXBNTsn/edit#gid=1791495064"
+                  href={ASSETS.PUBLIC.EXTERNAL_ACCOMMODATION}
                   target="_blank"
                   className="underline"
+                  download
                 >
                   Accommodation Details Excel Sheet
                 </Link>{" "}

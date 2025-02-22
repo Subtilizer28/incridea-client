@@ -3,10 +3,11 @@
 // @ts-nocheck
 import React, { useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
+import { CONSTANT } from "~/constants";
 
 export default function Shaan(props) {
   const group = useRef();
-  const { nodes, materials, animations } = useGLTF("/2025/Pronites/shaan.glb");
+  const { nodes, materials, animations } = useGLTF(CONSTANT.ASSETS["3D"].SHAAN);
   const { actions } = useAnimations(animations, group);
 
   // Start the first animation once the component mounts.
@@ -58,4 +59,4 @@ export default function Shaan(props) {
   );
 }
 
-useGLTF.preload("/2025/Pronites/shaan.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].SHAAN);

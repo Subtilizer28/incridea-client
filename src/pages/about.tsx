@@ -1,36 +1,78 @@
+import { useMutation } from "@apollo/client";
 import Image from "next/image";
 import React, { useState } from "react";
-
+import toast from "react-hot-toast";
+import { AddXpDocument, GetUserXpDocument } from "~/generated/generated";
 import Banner from "~/components/aboutUs/banner";
-import { env } from "~/env";
+import { CONSTANT } from "~/constants";
+import { AuthStatus, useAuth } from "~/hooks/useAuth";
 
 const images = [
-  { id: 15, alt: "a forest after an apocalypse" },
-  { id: 15, alt: "a waterfall and many rocks" },
-  { id: 15, alt: "a house on a mountain" },
-  { id: 15, alt: "some pink flowers" },
-  { id: 15, alt: "big rocks with some trees" },
-  { id: 15, alt: "a waterfall, trees and a view from the sky" },
-  { id: 15, alt: "a cool landscape" },
-  { id: 15, alt: "inside a town between two big buildings" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE1, alt: "Image 1" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE2, alt: "Image 2" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE3, alt: "Image 3" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE4, alt: "Image 4" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE5, alt: "Image 5" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE6, alt: "Image 6" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE7, alt: "Image 7" },
+  { id: CONSTANT.ASSETS.ABOUT.IMAGE8, alt: "Image 8" },
 ];
 
 const About = () => {
+  const session = useAuth();
+
   const [isActive, setIsActive] = useState(false);
+  const [calledXp, setCalledXp] = useState(false);
+
+  const [addXp] = useMutation(AddXpDocument, {
+    variables: {
+      levelId: "2",
+    },
+    refetchQueries: [GetUserXpDocument],
+    awaitRefetchQueries: true,
+  });
+
+  const handleAddXp = async () => {
+    if (session.status !== AuthStatus.AUTHENTICATED) {
+      toast.error("Please login to collect the Time Stones!", {
+        position: "bottom-center",
+        style: {
+          backgroundColor: "#f1e5d0",
+          color: "#005c39",
+          fontWeight: "bold",
+        },
+      });
+      return
+    }
+
+    if (calledXp)
+      return;
+
+    setCalledXp(true);
+    const { data } = await addXp()
+    if (data?.addXP.__typename === "MutationAddXPSuccess")
+      toast.success(
+        `Congratulations! You have found ${data.addXP.data.level.point} Time Stones!`,
+        {
+          position: "bottom-center",
+          style: {
+            backgroundColor: "#f1e5d0",
+            color: "#005c39",
+            fontWeight: "bold",
+          },
+        },
+      );
+  };
 
   return (
-    <div className="max-w-screen-2xl mx-auto p-4 md:p-12 flex flex-col gap-y-2 md:gap-16">
+    <div className="max-w-screen-2xl mx-auto p-4 md:p-32 pb-10 flex flex-col gap-y-2 md:gap-16">
       <div className="flex min-h-screen flex-col gap-y-2 md:gap-16">
-        <Banner
-          video={"https://vimeo.com/883551016?share=copy"}
-          text=""
-          credits=""
-        />
+        <Banner video={"https://vimeo.com/1055845788?share=copy"} credits="" />
 
         <span className="text-base text-secondary-100 md:text-lg xl:text-xl">
           <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
             <Image
-              src={`${env.NEXT_PUBLIC_UPLOADTHING_URL}/assets/png/nitteLogoWhite.png`}
+              src={CONSTANT.ASSETS.PUBLIC.NITTE_LOGO}
               alt="image"
               loading="lazy"
               className="top-0 h-full w-3/4 object-contain object-center md:w-1/3"
@@ -42,8 +84,8 @@ const About = () => {
               (NMAMIT), Nitte, established in 1986 and recognized by the
               All-India Council for Technical Education, New Delhi, has been a
               constituent college of Nitte (Deemed to be University), Mangaluru,
-              since June 2022. NMAMIT is placed in the Rank band 101-150 in the
-              National Institutional Ranking Framework (NIRF) 2023 by the
+              since June 2022. NMAMIT is placed in the Rank band 151-200 in the
+              National Institutional Ranking Framework (NIRF) 2024 by the
               Ministry of Education, Government of India. NMAMIT, the off-campus
               centre of Nitte DU located at Nitte Village, has active
               collaborations with several international universities and
@@ -57,26 +99,24 @@ const About = () => {
               students interested in taking up research work leading to Ph.D.
               For details, visit{" "}
               <a
-                href="https://nmamit.nitte.edu.in/"
+                href="https://www.nitte.edu.in/nmamit"
                 target="_blank"
                 rel="noreferrer"
                 className="underline underline-offset-4"
               >
-                www.nmamit.nitte.edu.in
+                www.nitte.edu.in/nmamit
               </a>
             </div>
           </div>
         </span>
       </div>
-      <Banner
-        video={"https://vimeo.com/909929083?share=copy"}
-        text=""
-        credits=""
-      />
+
+      <Banner video={"https://vimeo.com/1055896700?share=copy"} credits="" />
+
       <span className="text-base text-secondary-100 md:text-lg xl:text-xl">
         <div className="relative flex flex-col items-center justify-between gap-16 lg:flex-row">
           {/* Gallery Section - Contained width, proper spacing */}
-          <div className="relative w-full lg:w-2/4 pt-24 pb-28">
+          <div className="relative w-full lg:w-1/3 md:pt-24 pt-40 pb-28 my-4">
             <style jsx>{`
               .gallery {
                 --s: min(120px, 80vw);
@@ -154,27 +194,28 @@ const About = () => {
             <div className="gallery" onClick={() => setIsActive(!isActive)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`${env.NEXT_PUBLIC_UPLOADTHING_URL}/assets/png/logo-rim-white.png`}
+                src={CONSTANT.ASSETS.PUBLIC.LOGO_RIM_WHITE}
                 alt="Incridea Logo"
                 loading="lazy"
                 className={`object-contain logo ${isActive ? "active" : ""} object-contain origin-bottom animate-shakelogo`}
                 height={400}
                 width={400}
+                onClick={async () => await handleAddXp()}
               />
               {images.map(({ id, alt }) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={id}
-                  src={`https://picsum.photos/id/${id}/300/300`}
+                  src={id}
                   alt={alt}
-                  className={isActive ? "active " : ""}
+                  className={`${isActive ? "active " : ""}`}
                 />
               ))}
             </div>
           </div>
 
           {/* Content Section - More width, proper spacing */}
-          <div className="relative z-0 w-full lg:w-2/4 px-2 lg:pl-14 flex justify-center items-center">
+          <div className="relative z-0 w-full lg:w-2/3 px-2 flex justify-center items-center">
             <div className="max-w-3xl text-justify">
               Incridea is a colossal national-level techno-cultural fest with an
               audience pool spread among{" "}
@@ -194,8 +235,8 @@ const About = () => {
               footfall of around <span className="font-bold">45,000</span>,
               making it one of the most happening fests in the region. With
               grand successes over the years and a flair for perfection, we
-              intend to make Incridea &apos;24 and grand success and the best
-              one so far.
+              intend to make Incridea &apos;{CONSTANT.YEAR_SHORT} and grand
+              success and the best one so far.
             </div>
           </div>
         </div>

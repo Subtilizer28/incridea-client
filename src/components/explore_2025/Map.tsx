@@ -1,10 +1,11 @@
-import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { useAnimations, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useRef } from "react";
 import { useRouter } from "next/router";
+import { useEffect, useRef } from "react";
 
 import linksData from "~/components/explore_2025/data/data.json";
+import { CONSTANT } from "~/constants";
 
 type Link = {
   id: number;
@@ -23,7 +24,7 @@ const links: Link[] = linksData.links.map((link) => ({
 
 export const Map = ({ model, ...props }: MapProps) => {
   const { nodes, materials, animations } = useGLTF(
-    "/2025/assets/explore/models/medieval_bounded_final.glb",
+    CONSTANT.ASSETS["3D"].MEDIEVAL_BOUNDED,
   ) as never;
   const group = useRef<THREE.Group>(null);
   const { actions } = useAnimations(animations as THREE.AnimationClip[], group);
@@ -702,4 +703,4 @@ export const Map = ({ model, ...props }: MapProps) => {
   );
 };
 
-useGLTF.preload("/2025/assets/explore/models/medieval_bounded_final.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].MEDIEVAL_BOUNDED);

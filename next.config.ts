@@ -13,38 +13,37 @@ import { type NextConfig } from "next";
  */
 import "./src/env";
 
+import "./src/check-assets";
+
 const config: NextConfig = {
-  reactStrictMode: true,
+  distDir: process.env.BUILD_DIR ?? ".next",
+
+  experimental: {
+    // typedRoutes: true,
+  },
 
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "res.cloudinary.com",
+        hostname: "*.incridea.in",
       },
       {
         protocol: "https",
-        hostname: "incridea.in",
+        hostname: "*.utfs.io",
       },
       {
         protocol: "https",
-        hostname: "utfs.io",
+        hostname: "*.ufs.sh",
       },
-	// {
-  //       protocol: "http",
-  //       hostname: "localhost",
-  //     },
       {
         protocol: "https",
-        hostname: "x79smvkrpn.ufs.sh",
+        hostname: "example.com",
       },
     ],
   },
 
-  // webpack: (config) => {
-  //   config.resolve.fallback = { fs: false };
-  //   return config;
-  // },
+  reactStrictMode: true,
 };
 
 export default config;

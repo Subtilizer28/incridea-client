@@ -54,3 +54,5 @@ dist/
 **/public/fallback-*.js
 
 .eslintcache
+
+*.local.ts

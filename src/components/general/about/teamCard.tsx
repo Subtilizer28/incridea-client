@@ -1,11 +1,9 @@
 import Image from "next/image";
-import { type FC } from "react";
 import { AiFillGithub, AiFillInstagram } from "react-icons/ai";
 import { RiLinkedinFill } from "react-icons/ri";
 
-import { env } from "~/env";
 
-const TeamCard: FC<{
+const TeamCard = ({ name, role, linkedin, github, quote, instagram, image }: {
   name: string;
   role: string;
   image: string;
@@ -13,20 +11,19 @@ const TeamCard: FC<{
   instagram: string;
   github: string;
   quote: string;
-  avatar: string;
-}> = ({ name, role, linkedin, github, quote, instagram, image }) => {
+}) => {
   return (
     <div className="flex w-[20rem] gap-4 rounded-xl border border-primary-200/80 bg-primary-500 bg-opacity-20 bg-clip-padding px-5 pt-5 duration-200 hover:scale-[1.02]">
       <div className="flex h-full w-full flex-col gap-4">
         <Image
-          src={`${env.NEXT_PUBLIC_UPLOADTHING_URL}/` + image}
+          src={image}
           alt={name}
           height={300}
           width={300}
           className="top-0 aspect-square w-[18rem] rounded-xl object-cover"
         />
         <div>
-          <h3 className="text-center font-VikingHell text-3xl tracking-wide text-white">
+          <h3 className="text-center font-life-craft text-4xl tracking-wide text-white">
             {name}
           </h3>
           <h1 className="text-center text-xl font-semibold text-white">

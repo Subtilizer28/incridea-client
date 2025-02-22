@@ -7,6 +7,7 @@ import { TbArrowBackUp } from "react-icons/tb";
 import Button from "~/components/button";
 import AccommodationForm from "~/components/form/accommodation";
 import Loader from "~/components/loader";
+import { CONSTANT } from "~/constants";
 import { useAuth } from "~/hooks/useAuth";
 
 const Accommodation: NextPage = () => {
@@ -14,11 +15,26 @@ const Accommodation: NextPage = () => {
   const { user, loading } = useAuth();
 
   if (loading) return <Loader />;
-  if (!user) void router.push("/login");
-  if (user?.college?.id == "1") void router.push("/profile");
+
+  if (!user) {
+    void router.push("/login");
+    return <>
+      Redirecting...
+    </>
+  }
+
+  if (user.college?.id == `${CONSTANT.NMAMIT_COLLEGE_ID}`) {
+
+    void router.push("/profile");
+    void router.push("/login");
+    return <>
+      Redirecting...
+    </>
+  }
+
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-b from-primary-300 to-primary-500 px-4 pb-10 pt-32 text-white md:px-6">
+      <div className="min-h-screen px-4 pb-10 pt-32 text-white md:px-6">
         <div className="mx-auto max-w-4xl">
           <div className="p-4">
             <Link href="/accommodation">
@@ -48,21 +64,19 @@ const Accommodation: NextPage = () => {
             </h3>
             <ol className="mt-2 list-decimal pl-4">
               <li>
-                PG Boys Hostel is assigned for boys, which will be closed within
-                half an hour from the time the programs end at Night.
+                Main Boys Hostel is assigned for boys, which will be closed within half an hour from the time the programs end at Night.
               </li>
               <li>
-                Rooms provided will be of 4-sharing system. Per head charges for
-                the same is ₹150 per day.
+                Rooms provided will be of 3-sharing system. Per head charges for the same is 200 per day.
               </li>
               <li>
-                Consumption of alcohol or any similar substances is strictly
-                prohibited and strict action will be taken if found guilty of
-                the same.
+                Consumption of alcohol or any similar substances is strictly prohibited and strict action will be taken if found guilty of the same.
               </li>
               <li>
-                If found guilty of damaging any of the resources or property of
-                college strict action will be taken.
+                If found guilty of damaging any of the resources or property of college strict action will be taken.
+              </li>
+              <li>
+                Participants are advised to bring their own locks to ensure the protection of their belongings in the rooms.
               </li>
               <li>Do not litter the rooms provided.</li>
             </ol>
@@ -72,35 +86,27 @@ const Accommodation: NextPage = () => {
             </h3>
             <ol className="mt-2 list-decimal pl-4">
               <li>
-                EDC Block is assigned for girls, which will be closed within
-                half an hour from the time the programs end at Night.
+                EDC Block is assigned for girls, which will be closed within half an hour from the time the programs end at Night.
               </li>
               <li>
-                Rooms provided will be of 3-sharing system. Per head charges for
-                the same is ₹150 per day.
+                Rooms provided will be of 3-sharing system. Per head charges for the same is 200 per day.
               </li>
               <li>
-                A dormitory is also available with a capacity of 17. Per head
-                charges for the same is ₹150 per day.
+                A dormitory is also available with a capacity of 20. Per head charges for the same is 200 per day.
               </li>
               <li>
-                Consumption of alcohol or any similar substances is strictly
-                prohibited and will result in severe consequences being taken.
+                Consumption of alcohol or any similar substances is strictly prohibited and will result in severe consequences being taken.
               </li>
               <li>
-                The security will open EDC at 6 am in the morning, so if you
-                want anything during the night time, you cannot go out and hence
-                it is advised to carry the necessary things well in advance.
+                The security will open EDC at 6 am in the morning, so if you want anything during the night time, you cannot go out and hence it is advised to carry the necessary things well in advance.
               </li>
               <li>
-                Do not damage the resources provided from college. If found
-                guilty, strict action will be taken.
+                Do not damage the resources provided from college. If found guilty, strict action will be taken.
               </li>
               <li>
-                Participants are advised to bring their own locks to ensure the
-                protection of their belongings in the dormitory.{" "}
+                Participants are advised to bring their own locks to ensure the protection of their belongings in the dormitory.
               </li>
-              <li> Do not litter the dormitory.</li>
+              <li>Do not litter the dormitory.</li>
             </ol>
 
             <div className="mt-2">

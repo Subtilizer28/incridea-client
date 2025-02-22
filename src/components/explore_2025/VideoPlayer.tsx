@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
-import YouTube, { YouTubePlayer, YouTubeProps } from "react-youtube";
-import { SlVolume2, SlVolumeOff } from "react-icons/sl";
 import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
+import { SlVolume2, SlVolumeOff } from "react-icons/sl";
+import YouTube, { YouTubePlayer, YouTubeProps } from "react-youtube";
+
 import Button from "~/components/button";
 import { IoIosSkipForward } from "react-icons/io";
 import { router } from "next/client";
+import { CONSTANT } from "~/constants";
 
 export const VideoPlayer = (props: { props: [string, string] }) => {
   const [clickThru, setClickThru] = useState<boolean>(true);
@@ -77,7 +79,7 @@ export const VideoPlayer = (props: { props: [string, string] }) => {
         className="absolute z-40 flex h-screen w-screen items-center justify-center bg-black"
       >
         <Image
-          src="/2025/loader/portal/logo-combined.png"
+          src={CONSTANT.ASSETS.PUBLIC.LOGO_COMBINED}
           alt=""
           height={240}
           width={240}

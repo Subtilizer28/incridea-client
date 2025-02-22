@@ -1,10 +1,11 @@
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { useCallback, Suspense, useEffect, useRef, useState } from "react";
 import { GLTFLoader, DRACOLoader } from "three-stdlib";
 import Modal from "../gallery-modal";
 import PreviewComponent from "../previewComponent/preview-component";
 import * as THREE from "three";
 import gsap from "gsap";
+import { CONSTANT } from "~/constants";
 
 const Inc23 = ({
   imgArr,
@@ -23,8 +24,10 @@ const Inc23 = ({
   }, []);
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
-      <Canvas>
+    <div
+      className={`relative -top-[${window.innerWidth >= 768 && window.innerWidth < 1024 && window.innerWidth < window.innerHeight}] h-screen w-screen overflow-hidden`}
+    >
+      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
         <ambientLight intensity={5} />
         <Suspense fallback={null}>
           <Model
@@ -73,6 +76,7 @@ const Inc23 = ({
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
+                    rel="preload"
                     src={imgArr[index]}
                     onClick={() => handleImageClick(index)}
                     className="object-cover w-full h-full rounded-lg shadow-lg transition-transform duration-700 ease-in-out"
@@ -92,7 +96,7 @@ const Inc23 = ({
           imgArr={imgArr}
           index={activeIndex}
           afterMovieLink="gmF72fu1w6A"
-          thumbnailSrc="/2025/gallery/thumbnails/incridea22.webp"
+          thumbnailSrc={CONSTANT.ASSETS.GALLERY.THUMBNAIL23}
         />
       </Modal>
     </div>
@@ -113,35 +117,35 @@ const Model = ({
   const pendulumRef = useRef<THREE.Object3D | null>(null);
   const pivotRef = useRef<THREE.Group | null>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
+  const { camera, size } = useThree();
 
   useEffect(() => {
     if (!pivotRef.current) return;
 
-    // Find the camera in the scene
-    const camera = pivotRef.current.parent?.parent?.children.find(
-      (obj) => obj.type === "PerspectiveCamera",
-    ) as THREE.Camera | undefined;
+    // Convert screen coordinates to normalized device coordinates (NDC)
+    const ndcX = (clockPos.x / size.width) * 2 - 1;
+    const ndcY = -(clockPos.y / size.height) * 2 + 1;
 
-    if (!camera) return;
+    // Create vectors for the calculation
+    const vector = new THREE.Vector3(ndcX, ndcY, 0);
+    vector.unproject(camera);
 
-    //normalized device coordinates
-    const ndcX = (clockPos.x / window.innerWidth) * 2 - 1;
-    const ndcY = -(clockPos.y / window.innerHeight) * 2 + 1;
+    // Calculate the direction from camera to the point
+    const dir = vector.sub(camera.position).normalize();
 
-    //ndc to world position
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera);
+    // Calculate distance to the z=0 plane
+    const distance = -camera.position.z / dir.z;
 
-    const targetZ = 0; //z position
-    const worldPos = new THREE.Vector3();
-    raycaster.ray.at(targetZ, worldPos);
+    // Get the final world position
+    const worldPos = camera.position.clone().add(dir.multiplyScalar(distance));
 
-    pivotRef.current.position.set(worldPos.x, worldPos.y, worldPos.z);
-  }, [clockPos]);
+    // Update pivot position
+    pivotRef.current.position.set(worldPos.x, worldPos.y, 0);
+  }, [clockPos, camera, size]);
 
   const gltf = useLoader(
     GLTFLoader,
-    "/2025/gallery/3d/pendulum.glb",
+    CONSTANT.ASSETS["3D"].PENDULUM,
     (loader) => {
       const dracoLoader = new DRACOLoader();
       dracoLoader.setDecoderPath(
@@ -175,13 +179,13 @@ const Model = ({
   }, [imgArr.length, setCurrentIndex]);
 
   return (
-    <group ref={pivotRef} position={[0, 1.6, 0]}>
+    <group ref={pivotRef}>
       <ambientLight intensity={0.6} />
       <directionalLight position={[2, 1, 3]} intensity={2} />
       <primitive
         ref={pendulumRef}
         object={gltf.scene}
-        scale={[0.4, 0.2, 0.4]}
+        scale={[0.4, 0.25, 0.4]}
         position={[0, -1.5, 0]}
       />
     </group>

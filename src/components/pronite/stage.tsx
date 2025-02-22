@@ -19,6 +19,7 @@ import {
 
 import { EventHandlers } from "@react-three/fiber/dist/declarations/src/core/events";
 import Screen from "~/components/pronite/screen";
+import { CONSTANT } from "~/constants";
 
 export default function Stage({
   src,
@@ -53,7 +54,7 @@ export default function Stage({
     layers?: Layers;
     dispose?: (() => void) | null;
   } & EventHandlers) {
-  const { nodes, materials } = useGLTF("/2025/Pronites/Stage.glb");
+  const { nodes, materials } = useGLTF(CONSTANT.ASSETS["3D"].STAGE);
 
   return (
     <group {...props} dispose={null}>
@@ -1072,4 +1073,4 @@ export default function Stage({
   );
 }
 
-useGLTF.preload("/2025/Pronites/Stage.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].STAGE);

@@ -1,18 +1,30 @@
 import { useQuery } from "@apollo/client";
 import { Bed, LogOut, QrCode, User } from "lucide-react";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FaAward } from "react-icons/fa";
+
 import { Button } from "~/components/button/button";
+import { CONSTANT } from "~/constants";
 import {
   GetUserXpDocument,
   GetXpLeaderboardDocument,
 } from "~/generated/generated";
 import { AuthStatus, useAuth } from "~/hooks/useAuth";
 
-const techTeamPid = [11, 15, 2, 1, 10, 9, 509, 59, 4, 8, 13, 16, 291, 74];
-function LeaderBoard({ setQr, isShowQr }: { setQr: () => void; isShowQr: boolean }) {
+const techTeamPid = CONSTANT.PID.TECH_TEAM;
+
+function LeaderBoard({
+  setQr,
+  isShowQr,
+}: {
+  setQr: () => void;
+  isShowQr: boolean;
+}) {
   const router = useRouter();
   const session = useAuth();
 
@@ -21,7 +33,7 @@ function LeaderBoard({ setQr, isShowQr }: { setQr: () => void; isShowQr: boolean
   const [userId, setUser] = useState("");
   const [rank, setRank] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [needMore, setNeedMore] = useState(0);
+  const [needMneedMoreore, setNeedMore] = useState(0);
 
   const userXp = useQuery(GetUserXpDocument, {});
 
@@ -46,26 +58,29 @@ function LeaderBoard({ setQr, isShowQr }: { setQr: () => void; isShowQr: boolean
         (_, i) => (i + 1) * 10,
       );
       // Calculate the user's current level based on the thresholds
-      let level = 0;
+      let level = 1;
       let totalPoints = 0;
       let levelPoints = 0;
 
       for (const threshold of newLevelThresholds) {
+        totalPoints += threshold;
+        levelPoints = threshold;
         if (totalXp >= threshold) {
           level++;
-          totalPoints += threshold;
-          levelPoints = threshold;
         } else {
           break;
         }
       }
-      setLevel(level - 1);
+      setLevel(level);
       setXp(totalXp);
       if (userXp.data.getUserXp.data[0])
         setUser(userXp.data.getUserXp.data[0].user.id);
+      console.log(totalPoints, totalXp, newLevelThresholds);
+
       setNeedMore(totalPoints - totalXp);
       setProgress(((levelPoints - totalPoints + totalXp) / levelPoints) * 100);
     }
+    console.log("Progress : ", progress);
   }, [userXp.data]);
 
   type UserTotalPoints = {
@@ -142,56 +157,95 @@ function LeaderBoard({ setQr, isShowQr }: { setQr: () => void; isShowQr: boolean
   }, [Leaderboard, userId]);
 
   return (
-    <div className="w-full flex flex-col gap-2  items-center justify-evenly row-span-1 border-secondary-500/50 border-t-2 p-2">
-
-<div className="w-full flex xl:flex-row md:flex-col sm:flex-row flex-col justify-between items-center flex-nowrap gap-2 sm:max-w-full max-w-sm">
-          <Button
-            className="w-full hover:scale-[105%] hover:bg-primary-800/60 text-white hover:text-white sm:max-w-full max-w-sm"
-            variant={"outline"}
-            onClick={() => setQr()}
-          >
-            {!isShowQr ?(
-              <>
-                <QrCode className="stroke-secondary-200" />
-                Show QR
-              </>
-            ) 
-            :(<>
-            <User className="stroke-secondary-200" />
-            Show Name
-            </>)
-          }
-          </Button>
-          <Button
-            variant={"destructive"}
-            className="w-full hover:scale-[105%]"
-            onClick={async () => {
-              await signOut();
-            }}
-          >
-            Log out <LogOut />
-          </Button>
-        </div>
-      <div className="w-full h-fit relative overflow-hidden rounded-xl border-secondary-500/50 border-2 mt-2">
-        <div className={`h-2 bg-red-600 w-[${progress}%]`}></div>
-      </div>
-
-      <div className="text-white grid grid-cols-2 place-items-stretch px-2">
-        <div>
-          <h3 className="font-semibold">Leaderboard</h3>
-          <strong>Rank {rank}</strong>
-        </div>
-        <div>
-          <p>{xp}xp</p>
-          {/* <p>you need {needMore} more xp</p> */}
-          {needMore > 0 ? (
-            <p>you need {needMore} more Timestones</p>
+    <div className="row-span-1 flex w-full flex-col items-center justify-evenly gap-2 border-t-2 border-secondary-500/50 p-2">
+      <div className="flex w-full max-w-sm flex-col flex-nowrap items-center justify-between gap-2 sm:max-w-full sm:flex-row md:flex-col xl:flex-row">
+        <Button
+          className="w-full max-w-sm text-white hover:scale-[105%] hover:bg-primary-800/60 hover:text-white sm:max-w-full"
+          variant={"outline"}
+          onClick={() => setQr()}
+        >
+          {!isShowQr ? (
+            <>
+              <QrCode className="stroke-secondary-200" />
+              Show QR
+            </>
           ) : (
-            <p>You have max Timestones</p>
+            <>
+              <User className="stroke-secondary-200" />
+              Show Name
+            </>
           )}
-        </div>
+        </Button>
+        <Button
+          variant={"destructive"}
+          className="w-full hover:scale-[105%]"
+          onClick={async () => {
+            toast.loading("Logging out...");
+            await signOut();
+            toast.success("Logged out successfully");
+          }}
+        >
+          Log out <LogOut />
+        </Button>
       </div>
-      <div className="w-full flex flex-col gap-2 items-center">
+      <div className="relative mt-2 h-fit w-full overflow-hidden rounded-xl border-2 border-secondary-500/50">
+        <div
+          className={`h-2 bg-amber-600`}
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+
+      <div className="mb-2 w-full px-2 text-white">
+        <div className="mx-auto mb-4 flex w-full max-w-md flex-row justify-between px-4">
+          <div className="text-sm font-semibold">
+            Domain{" "}
+            <span className="text-base font-bold text-secondary-500">
+              {level} 🗺
+            </span>
+          </div>
+          <div className="text-sm font-semibold">
+            Timestones{" "}
+            <span className="text-base font-bold text-secondary-500">
+              {xp} 💎
+            </span>
+          </div>
+        </div>
+
+        {rank === 0 ? (
+          <>
+            <div className="my-2 text-center text-sm opacity-90">
+              You need to collect {needMneedMoreore} 💎 TimeStones to join the
+              leaderboard
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mx-auto flex max-w-md flex-row items-center justify-between rounded-full border border-secondary-500 bg-primary-500/20 px-4 py-2">
+              <div className="flex flex-row flex-nowrap gap-1 text-sm font-semibold">
+                <Image
+                  className="size-10"
+                  src={CONSTANT.ASSETS.PROFILE.TROPHY}
+                  alt="trophy"
+                  width={100}
+                  height={100}
+                />
+                <div>
+                  <p>Leaderboard</p>
+                  <p className="text-accent-400">Rank {rank}</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1 text-sm font-semibold">
+                <p>You need</p>
+                <p>
+                  <span className="text-accent-400">{needMneedMoreore}</span> 💎
+                  more
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      <div className="flex w-full flex-col items-center gap-2">
         {/* TODO: Move component to the top */}
         {/* <div className="w-full flex xl:flex-row md:flex-col sm:flex-row flex-col justify-between items-center flex-nowrap gap-2 sm:max-w-full max-w-sm">
           <Button
@@ -204,7 +258,7 @@ function LeaderBoard({ setQr, isShowQr }: { setQr: () => void; isShowQr: boolean
                 <QrCode className="stroke-secondary-200" />
                 Show QR
               </>
-            ) 
+            )
             :(<>
             <User className="stroke-secondary-200" />
             Show Name
@@ -222,7 +276,7 @@ function LeaderBoard({ setQr, isShowQr }: { setQr: () => void; isShowQr: boolean
           </Button>
         </div> */}
 
-        <div className="w-full flex xl:flex-row md:flex-col sm:flex-row flex-col justify-between items-center flex-nowrap gap-2 sm:max-w-full max-w-sm">
+        <div className="flex w-full max-w-sm flex-col flex-nowrap items-center justify-between gap-2 sm:max-w-full sm:flex-row md:flex-col xl:flex-row">
           <Button
             onClick={() => router.push("/leaderboard")}
             className="w-full px-1"
@@ -231,12 +285,16 @@ function LeaderBoard({ setQr, isShowQr }: { setQr: () => void; isShowQr: boolean
             Leaderboard
           </Button>
 
-          {session.status === AuthStatus.AUTHENTICATED && session.user.college && session.user.college?.id !== "1" && 
-            <Button className="py-2 w-full px-1 hover:scale-[105%]">
-              <Bed />
-              Accomodation
-            </Button>
-          }
+          {session.status === AuthStatus.AUTHENTICATED &&
+            session.user.college &&
+            session.user.college.id !== "1" && (
+              <Button className="w-full px-1 py-2 hover:scale-[105%]" asChild>
+                <Link href="/accommodation">
+                  <Bed />
+                  Accomodation
+                </Link>
+              </Button>
+            )}
         </div>
       </div>
     </div>

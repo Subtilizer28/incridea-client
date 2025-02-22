@@ -4,6 +4,7 @@ import { Draggable } from "gsap/dist/Draggable";
 import Image from "next/image";
 import Modal from "../gallery-modal";
 import PreviewComponent from "../previewComponent/preview-component";
+import { CONSTANT } from "~/constants";
 
 gsap.registerPlugin(Draggable);
 
@@ -118,13 +119,13 @@ const Inc22 = ({ imgArr }: { imgArr: string[] }) => {
     >
       {imgArr.map((img, index) => (
         <div
-          key={img}
-          className="absolute transform transition-all duration-300 ease-in-out stack-item 
+          key={index}
+          className="absolute transform transition-all duration-300 ease-in-out stack-item
           top-[15%] "
         >
           <div className="relative translate-y-[10%] right-[8%] w-[90vw] sm:w-[200vw] h-[100vh] sm:h-[50vh] max-w-[1000px] max-h-[800px] sm:translate-y-[70%] sm:right-[4%]">
             <Image
-              src="/2025/gallery/tablet.png"
+              src={CONSTANT.ASSETS.GALLERY.TABLET}
               alt="Tablet frame"
               layout="fill"
               objectFit="contain"
@@ -132,12 +133,13 @@ const Inc22 = ({ imgArr }: { imgArr: string[] }) => {
             />
 
             <div className="absolute inset-10 flex justify-center items-center">
-              <Image
-                src={`/${img}`}
+              <img
+                rel="preload"
+                className="object-fit"
+                src={img}
                 alt={`Image ${index + 1}`}
                 height={200}
                 width={200}
-                objectFit="contain"
                 onClick={() => handleClick(index)}
                 style={{
                   height: "190px",
@@ -159,7 +161,7 @@ const Inc22 = ({ imgArr }: { imgArr: string[] }) => {
               imgArr={imgArr}
               index={activeIndex}
               afterMovieLink="JHgT5PzLc4Q"
-              thumbnailSrc="/2025/gallery/thumbnails/incridea22.webp"
+              thumbnailSrc={CONSTANT.ASSETS.GALLERY.THUMBNAIL22}
             />
           </Modal>
         </div>

@@ -41,53 +41,44 @@ function EventRegistration({
   return (
     <>
       {/* TODO(Omkar): check these urgent */}
-      {eventId === "29" ||
-      eventId === "50" ||
-      eventId === "78" ||
-      eventId === "72" ||
-      eventId === "74" ||
-      eventId === "75" ||
-      eventId === "77" ||
-      eventId === "79" ||
-      eventId === "80" ||
-      eventId == "10" ? (
-        <div
-          className={`${
-            eventId === "10"
-              ? "border border-red-500 bg-red-500/30"
-              : "border border-green-500 bg-green-500/30"
-          } flex w-full justify-center rounded-full p-1 backdrop-blur-3xl`}
-        >
-          {eventId === "78"
-            ? "23 Feb 2024, 9am - 12pm"
-            : eventId === "50"
-              ? "Event is only open for N.M.A.M.I.T faculties"
-              : eventId === "10"
-                ? "Registration Closed"
-                : "Exhibition open all 3 days"}
-        </div>
-      ) : !user ? (
+      {eventId === "51" ? (
+      <div
+        className={`${"border font-semibold italic p-2.5 px-3 border-secondary-500 bg-green-500/10"
+        } flex w-full justify-center rounded-full p-1 backdrop-blur-3xl`}
+      >
+        Exhibition open on all 3 days
+      </div >
+      ) : eventId === "69" ? (
+      <div
+        className={`${"border font-semibold text-sm italic p-2.5 px-3 border-secondary-500 bg-green-500/10"
+        } flex w-full justify-center rounded-full p-1 backdrop-blur-3xl text-center`}
+      >
+        Open to only Faculties and Non Teaching Staff
+      </div >
+      ) :
+      !user ? (
         <Link
-          as={"/login"}
-          href={`/login?redirectUrl=${encodeURIComponent(`/event/${slug}`)}`}
-          className="w-fit lg:w-full"
+        as={"/login"}
+        href={`/login?redirectUrl=${encodeURIComponent(`/event/${slug}`)}`}
+        className="w-fit lg:w-full"
         >
-          <button className="mt-1 flex w-fit shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-tr from-secondary-800 to-secondary-600 px-5 py-1 capitalize text-white brightness-100 transition-all duration-300 hover:scale-[1.02] hover:brightness-125">
-            <CiLogin />
-            Login to Register
-          </button>
+        <button className="mt-1 flex w-fit shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-tr from-secondary-800 to-secondary-600 px-5 py-1 capitalize text-white brightness-100 transition-all duration-300 hover:scale-[1.02] hover:brightness-125">
+          <CiLogin />
+          Login to Register
+        </button>
         </Link>
       ) : (
         <EventRegistrationButton
-          userId={user.id}
-          registered={user.role !== Role.User}
-          eventId={eventId}
-          type={type}
-          fees={fees}
-          name={user.name}
-          email={user.email}
+        userId={user.id}
+        registered={user.role !== Role.User}
+        eventId={eventId}
+        type={type}
+        fees={fees}
+        name={user.name}
+        email={user.email}
         />
-      )}
+      )
+      }
     </>
   );
 }

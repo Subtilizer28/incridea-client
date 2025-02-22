@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { CONSTANT } from "~/constants";
 
 function Theme() {
   // redirect to youtube
@@ -12,7 +13,7 @@ function Theme() {
   return (
     <div className="h-screen w-screen bg-black flex justify-center items-center">
       <Image
-        src={"/2025/logo.png"}
+        src={CONSTANT.ASSETS.PUBLIC.LOGO_BLACK}
         className="animate-pulse"
         alt="logo"
         width={300}

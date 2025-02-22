@@ -1,11 +1,13 @@
-import { SPONSORS } from "~/constants/sponsors";
+import { TEAM_MEMBERS } from "~/constants/team";
+import { ASSETS } from "~/constants/assets";
 
 const CONSTANT = {
-  REGISTRATIONS_OPEN: true,
   BASE_URL: "https://incridea.in" as const,
-  COLLEGE_NAME: "NMAM Institute of Technology",
+  NMAMIT_COLLEGE_ID: 1,
   PID_FORMAT: "INC25-" as const,
+  TID_FORMAT: "T25-" as const,
   YEAR: 2025 as const,
+  YEAR_SHORT: 25 as const,
   REG_AMOUNT_IN_INR: {
     INTERNAL: 350,
     EXTERNAL: 450,
@@ -17,7 +19,6 @@ const CONSTANT = {
         "https://www.instagram.com/reel/DE2IY6FvbTm/?igsh=MTdsbnc1bjMyaXZuYw==",
     },
   },
-  // TODO(Omkar): Needs updates
   DATE: {
     ROUND: {
       DEAFULT_START: new Date(2025, 2, 27, 9, 30),
@@ -33,9 +34,13 @@ const CONSTANT = {
     },
   },
   PID: {
-    TECH_TEAM: [11, 15, 2, 1, 10, 9, 509, 59, 4, 8, 13, 16, 291, 74],
+    PRONITE_USER: 669 as const,
+    // TODO(Omkar): Update following, reflects in the leaderboard
+    TECH_TEAM: [1, 2, 5, 7, 9, 17, 18, 28, 36, 37, 39, 120, 125, 126, 127, 131, 498, 897, 1095],
+    ACCOMMODATION_TEAM: [96]
   },
-  SPONSORS: SPONSORS,
+  ASSETS: ASSETS,
+  TEAM_MEMBERS: TEAM_MEMBERS,
 };
 
 export { CONSTANT };

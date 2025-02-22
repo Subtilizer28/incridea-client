@@ -4,13 +4,14 @@
 
 import React, { useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
+import { CONSTANT } from "~/constants";
 
-useGLTF.preload("/2025/pronites/guitarist.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].GUITARIST);
 
 export default function Guitarist(props) {
   const group = useRef();
   const { nodes, materials, animations } = useGLTF(
-    "/2025/Pronites/guitarist.glb",
+    CONSTANT.ASSETS["3D"].GUITARIST,
   );
   const { actions } = useAnimations(animations, group);
 

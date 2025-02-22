@@ -10,6 +10,8 @@ import { useRouter } from "next/router";
 import { useAuth } from "~/hooks/useAuth";
 import Spinner from "~/components/spinner";
 import { Role } from "~/generated/generated";
+import Button from "~/components/button";
+import Link from "next/link";
 
 const Analytics: NextPage = () => {
   const router = useRouter();
@@ -26,15 +28,16 @@ const Analytics: NextPage = () => {
   }
   if (user.role !== Role.Admin && user.role !== Role.Jury) {
     void router.push("/profile");
-    return null;
+    return <div>Redirecting...</div>
   }
-
-  if (user && user.role !== Role.Admin && user.role !== Role.Jury) return <></>;
 
   return (
     <Dashboard>
-      <div className="p-2">
-        <div className="grid md:grid-cols-3 gap-4 mb-4">
+      <div className="p-2 flex justify-center items-center flex-col gap-4">
+        <Link href="/dashboard" className="self-end">
+          <Button intent={"danger"}>Go Back</Button>
+        </Link>
+        <div className="grid w-full md:grid-cols-3 gap-4 mb-4">
           <RevenueCard />
           <RegistrationCard />
           <ProniteRegistrationCard />
@@ -48,7 +51,7 @@ const Analytics: NextPage = () => {
           </div>
         </div>
       </div>
-    </Dashboard>
+    </Dashboard >
   );
 };
 

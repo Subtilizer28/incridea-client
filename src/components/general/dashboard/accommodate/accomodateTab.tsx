@@ -7,15 +7,15 @@ import {
   AccommodationRequestsDocument,
 } from "~/generated/generated";
 
-import AddAccommodateDetails from "./addAccommodateDetails";
+import EditAccommodateDetails from "./editAccommodateDetails";
 import HotelModal from "./hotelModal";
 import ViewAccommodateDetails from "./viewAccommodateDetails";
 
 const AccommodateTab: FC = () => {
   const { data: accommodationRequests, loading: accommodateLoading } = useQuery(
     AccommodationRequestsDocument,
-    {},
   );
+
   return (
     <>
       <div>
@@ -48,8 +48,8 @@ const AccommodateTab: FC = () => {
 
             <div className="max-h-80 w-full overflow-y-auto text-center md:h-[300px] md:max-h-80">
               {accommodationRequests?.accommodationRequests?.__typename ==
-              "QueryAccommodationRequestsSuccess" ? (
-                accommodationRequests?.accommodationRequests?.data.map(
+                "QueryAccommodationRequestsSuccess" ? (
+                accommodationRequests.accommodationRequests.data.map(
                   (acc, idx) => (
                     <div
                       key={idx}
@@ -62,45 +62,44 @@ const AccommodateTab: FC = () => {
                         {acc?.gender}
                       </h1>
                       <h1 className="flex basis-1/6 justify-center py-0.5 text-center text-sm">
-                        {acc?.checkIn
-                          ? new Date(acc?.checkIn).toLocaleString("en-IN", {
-                              timeZone: "Asia/Kolkata",
-                            })
+                        {acc.checkIn
+                          ? new Date(acc.checkIn).toLocaleString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                          })
                           : "Not Available"}
                       </h1>
                       <h1 className="flex basis-1/6 justify-center py-0.5 text-center text-sm">
-                        {acc?.checkOut
-                          ? new Date(acc?.checkOut).toLocaleString("en-IN", {
-                              timeZone: "Asia/Kolkata",
-                            })
+                        {acc.checkOut
+                          ? new Date(acc.checkOut).toLocaleString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                          })
                           : "Not Available"}
                       </h1>
                       <h1 className="flex basis-1/6 justify-center py-0.5 text-center text-lg">
-                        {acc?.hotel?.name}
+                        {acc.hotel.name}
                       </h1>
                       <h1 className="flex basis-1/6 justify-center py-0.5 text-center text-lg">
-                        {acc?.room}
+                        {acc.room}
                       </h1>
                       <h1
-                        className={`flex basis-1/6 justify-center py-0.5 text-center text-lg ${
-                          acc?.status == AccommodationBookingStatus.Confirmed
-                            ? "border-green-500 text-green-500"
-                            : "border-red-500 text-red-500"
-                        }`}
+                        className={`flex basis-1/6 justify-center py-0.5 text-center text-lg ${acc?.status == AccommodationBookingStatus.Confirmed
+                          ? "border-green-500 text-green-500"
+                          : "border-red-500 text-red-500"
+                          }`}
                       >
                         {acc?.status}
                       </h1>
                       <h1 className="bg-slate flex basis-1/6 justify-center py-0.5 text-center text-lg">
-                        <AddAccommodateDetails accId={acc?.id} />
+                        <EditAccommodateDetails accommodation={acc} />
                       </h1>
-                      <ViewAccommodateDetails accId={acc?.user?.id} />
+                      <ViewAccommodateDetails accId={acc.user.id} />
                     </div>
                   ),
                 )
               ) : (
                 <>
                   {accommodationRequests?.accommodationRequests?.__typename ==
-                  "Error" ? (
+                    "Error" ? (
                     <div className="flex items-center justify-center">
                       <h1 className="text-2xl text-gray-300">
                         No Accommodation Requests

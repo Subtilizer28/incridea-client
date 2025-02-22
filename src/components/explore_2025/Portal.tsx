@@ -1,12 +1,12 @@
-import React from "react";
 import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
+import React from "react";
+
+import { CONSTANT } from "~/constants";
 
 export function Portal(props: { props: never }) {
-  const { nodes, materials } = useGLTF(
-    "/2025/assets/explore/models/portal.glb",
-  );
+  const { nodes, materials } = useGLTF(CONSTANT.ASSETS["3D"].PORTAL);
   return (
     <RigidBody type="fixed" colliders="trimesh">
       <group
@@ -246,4 +246,4 @@ export function Portal(props: { props: never }) {
   );
 }
 
-useGLTF.preload("/2025/assets/explore/models/portal.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].PORTAL);

@@ -1,15 +1,22 @@
-import { useEffect, useMemo, useRef } from "react";
-import { Canvas, useLoader } from "@react-three/fiber";
 import type * as THREE from "three";
-import { useDrag } from "@use-gesture/react";
-import gsap from "gsap";
-import { DRACOLoader, GLTFLoader, type GLTF } from "three-stdlib";
-import { angleToScenes } from "~/pages/gallery";
+import { useMutation } from "@apollo/client";
+import { Canvas, useLoader } from "@react-three/fiber";
 import {
-  EffectComposer,
   Bloom,
   BrightnessContrast,
+  EffectComposer,
 } from "@react-three/postprocessing";
+import { useDrag } from "@use-gesture/react";
+import gsap from "gsap";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { DRACOLoader, type GLTF, GLTFLoader } from "three-stdlib";
+
+import { angleToScenes } from "~/pages/gallery";
+
+import { CONSTANT } from "~/constants";
+import { AddXpDocument, GetUserXpDocument, Role } from "~/generated/generated";
+import { AuthStatus, useAuth } from "~/hooks/useAuth";
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -41,13 +48,19 @@ const getSnapAngle = (angle: number): number => {
 };
 
 const Model = ({ handRef }: { handRef: React.RefObject<THREE.Group> }) => {
-  const gltf = useLoader(GLTFLoader, "/2025/gallery/3d/clock.glb", (loader) => {
+  const gltf = useLoader(GLTFLoader, CONSTANT.ASSETS["3D"].CLOCK, (loader) => {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("https://www.gstatic.com/draco/v1/decoders/");
     loader.setDRACOLoader(dracoLoader);
   }) as GLTFResult;
 
   const { nodes, materials } = gltf;
+
+  useEffect(() => {
+    if (handRef.current) {
+      handRef.current.rotation.y = Math.PI / 2;
+    }
+  }, [handRef]);
 
   return (
     <group
@@ -85,13 +98,51 @@ const Model = ({ handRef }: { handRef: React.RefObject<THREE.Group> }) => {
 type ClockProps = {
   onClockClick?: (angle: number) => void;
   year: number;
+  onRotationComplete?: (count: number) => void;
 };
 
-const Clock = ({ onClockClick, year }: ClockProps) => {
+const Clock = ({ onClockClick, year, onRotationComplete }: ClockProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const handRef = useRef<THREE.Group>(null);
   const gsapContextRef = useRef<gsap.Context | null>(null);
-  const previousAngleRef = useRef<number | null>(null); // Tracks the last angle during drag
+  const previousAngleRef = useRef<number | null>(null);
+  const cumulativeRotationRef = useRef<number>(0);
+  const [rotationCount, setRotationCount] = useState<number>(0);
+  const [calledXp, setCalledXp] = useState(false);
+  const session = useAuth();
+
+  const [addXp] = useMutation(AddXpDocument, {
+    variables: {
+      levelId: "3",
+    },
+    refetchQueries: [GetUserXpDocument],
+    awaitRefetchQueries: true,
+  });
+
+  const handleAddXp = useCallback(async () => {
+    if (calledXp) return;
+
+    try {
+      setCalledXp(true);
+      const res = await addXp();
+
+      if (res.data?.addXP.__typename === "MutationAddXPSuccess") {
+        toast.success(
+          `Congratulations!!! You have earned ${res.data?.addXP.data.level.point} timestones.`,
+          {
+            position: "top-center",
+            style: {
+              backgroundColor: "#00653d",
+              color: "white",
+            },
+            duration: 5000,
+          },
+        );
+      }
+    } catch (error) {
+      console.error("Error adding XP:", error);
+    }
+  }, [addXp, calledXp]);
 
   useEffect(() => {
     // Create GSAP context
@@ -105,6 +156,35 @@ const Clock = ({ onClockClick, year }: ClockProps) => {
       }
     };
   }, []);
+
+  const updateRotationCount = (prevAngle: number, currentAngle: number) => {
+    if (prevAngle === null) return;
+
+    // Calculate the change in angle
+    let deltaAngle = currentAngle - prevAngle;
+
+    // Adjust for angle wrapping
+    if (deltaAngle > Math.PI) {
+      deltaAngle -= 2 * Math.PI;
+    } else if (deltaAngle < -Math.PI) {
+      deltaAngle += 2 * Math.PI;
+    }
+
+    // Update cumulative rotation (negative for anti-clockwise)
+    cumulativeRotationRef.current += deltaAngle;
+
+    // Calculate the number of full rotations (negative if anti-clockwise)
+    const completeRotations = Math.floor(
+      cumulativeRotationRef.current / (2 * Math.PI),
+    );
+
+    if (completeRotations !== rotationCount) {
+      setRotationCount(completeRotations);
+      if (onRotationComplete) {
+        onRotationComplete(completeRotations);
+      }
+    }
+  };
 
   const normalizeAngle = (angle: number) => {
     while (angle > Math.PI) angle -= 2 * Math.PI;
@@ -120,6 +200,55 @@ const Clock = ({ onClockClick, year }: ClockProps) => {
     },
     [],
   );
+
+  useEffect(() => {
+    const checkAndHandleEasterEgg = async () => {
+      if (
+        localStorage.getItem("galleryEasterEgg") === "true" &&
+        session.status === AuthStatus.AUTHENTICATED &&
+        session.user?.role !== Role.User
+      ) {
+        try {
+          await handleAddXp();
+          localStorage.removeItem("galleryEasterEgg");
+        } catch (error) {
+          console.error("Error handling easter egg:", error);
+        }
+      }
+    };
+
+    void checkAndHandleEasterEgg();
+  }, [session.status, session.user?.role, handleAddXp]);
+
+  useEffect(() => {
+    const handleRotationReward = async () => {
+      if (localStorage.getItem("galleryEasterEgg") === "true") return;
+
+      if (rotationCount > 4 || rotationCount < -4) {
+        if (
+          session.status === AuthStatus.AUTHENTICATED &&
+          session.user?.role !== Role.User
+        ) {
+          await handleAddXp();
+        } else {
+          toast.success(
+            "You have come across some timestones. Register to redeem your time stones",
+            {
+              position: "top-center",
+              style: {
+                backgroundColor: "#00653d",
+                color: "white",
+              },
+              duration: 5000,
+            },
+          );
+          localStorage.setItem("galleryEasterEgg", "true");
+        }
+      }
+    };
+
+    void handleRotationReward();
+  }, [rotationCount, session.status, session.user?.role, handleAddXp]);
 
   useEffect(() => {
     if (!handRef.current) return;
@@ -171,6 +300,7 @@ const Clock = ({ onClockClick, year }: ClockProps) => {
         return;
       }
 
+      updateRotationCount(previousAngleRef.current ?? 0, currentAngle);
       previousAngleRef.current = currentAngle;
 
       // Direct rotation application
@@ -210,7 +340,7 @@ const Clock = ({ onClockClick, year }: ClockProps) => {
   return (
     <div
       ref={containerRef}
-      className="cursor-pointer z-10 aspect-square sm:w-[230px] w-[200px] touch-none rounded-full overflow-hidden"
+      className="z-10 aspect-square w-[200px] cursor-pointer touch-none overflow-hidden rounded-full sm:w-[230px]"
       {...bind()}
     >
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>

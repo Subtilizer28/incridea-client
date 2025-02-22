@@ -1,9 +1,9 @@
 import { useQuery } from "@apollo/client";
 import { useEffect, useState, type FC } from "react";
-import EventCard from "./Event";
+import EventCard from "~/components/profile/Event";
 
 import { RegisterdEventsDocument } from "~/generated/generated";
-import { Button } from "../button/button";
+import { Button } from "~/components/button/button";
 import { MoveRight } from "lucide-react";
 import { useRouter } from "next/router";
 
@@ -39,14 +39,14 @@ const UserEvents: FC<{
           <div className="mx-auto border-2 border-secondary-400/80 w-fit rounded-full p-1 px-2 mt-4">
             <span className="text-lg font-semibold text-secondary-500">
               {events?.registeredEvents.__typename ===
-              "QueryRegisteredEventsSuccess"
+                "QueryRegisteredEventsSuccess"
                 ? events.registeredEvents.data.length - completed
                 : 0}
             </span>{" "}
             <span className="opacity-80">Voyage(s) left of</span>{" "}
             <span className="text-lg font-semibold text-secondary-500">
               {events?.registeredEvents.__typename ===
-              "QueryRegisteredEventsSuccess"
+                "QueryRegisteredEventsSuccess"
                 ? events.registeredEvents.data.length
                 : 0}
             </span>
@@ -54,7 +54,7 @@ const UserEvents: FC<{
         </div>
         {events?.registeredEvents.__typename ===
           "QueryRegisteredEventsSuccess" &&
-        events.registeredEvents.data.length === 0 ? (
+          events.registeredEvents.data.length === 0 ? (
           <div className="w-full h-full text-3xl text-white justify-center flex flex-col gap-6 items-center px-8">
             <p className="text-center">
               Register yourself in events to see your Quests
@@ -77,24 +77,6 @@ const UserEvents: FC<{
                 return (
                   <>
                     <EventCard
-                      isCompleted={isCompleted}
-                      teams={event.teams}
-                      event={event}
-                      userId={userId}
-                    />
-                     <EventCard
-                      isCompleted={isCompleted}
-                      teams={event.teams}
-                      event={event}
-                      userId={userId}
-                    />
-                     <EventCard
-                      isCompleted={isCompleted}
-                      teams={event.teams}
-                      event={event}
-                      userId={userId}
-                    />
-                     <EventCard
                       isCompleted={isCompleted}
                       teams={event.teams}
                       event={event}

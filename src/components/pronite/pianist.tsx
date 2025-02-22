@@ -4,11 +4,12 @@
 
 import React, { useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
+import { CONSTANT } from "~/constants";
 
 export default function Pianist(props) {
   const group = useRef();
   const { nodes, materials, animations } = useGLTF(
-    "/2025/Pronites/pianist.glb",
+    CONSTANT.ASSETS["3D"].PIANIST,
   );
   const { actions } = useAnimations(animations, group);
 
@@ -471,4 +472,4 @@ export default function Pianist(props) {
   );
 }
 
-useGLTF.preload("/2025/Pronites/pianist.glb");
+useGLTF.preload(CONSTANT.ASSETS["3D"].PIANIST);

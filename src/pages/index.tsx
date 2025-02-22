@@ -5,15 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Parallax from "parallax-js";
 import { useEffect, useRef, useState } from "react";
-import { BsFillSuitHeartFill } from "react-icons/bs";
 
 import { AuthStatus, useAuth } from "~/hooks/useAuth";
 import { cn } from "~/lib/utils";
 import styles from "~/components/coming-soon/shootingStars.module.css";
 import { SessionProvider } from "next-auth/react";
 import HomeButton from "~/components/button/home";
+import { CONSTANT } from "~/constants";
 
-export default function Landing() {
+export default function Page() {
   return (
     <SessionProvider>
       <main className="relative h-screen overflow-hidden select-none">
@@ -36,57 +36,58 @@ export const HomeFooter = () => {
 
     return () => clearTimeout(timeout);
   }, [show]);
+
   return (
     <footer
       className={cn(
-        "absolute bottom-0 flex w-full flex-col gap-2 text-green-900 font-bold text-[1rem] md:gap-4 h-14 ",
+        "absolute bottom-0 flex w-full flex-col gap-2 text-white font-semibold text-[1rem] md:gap-4 h-14",
+        "before:absolute before:inset-0 before:bg-gradient-to-t before:from-black/80 before:via-black/60 before:to-transparent before:-z-10",
+        "backdrop-blur-sm"
       )}
     >
       {show && (
         <ul
-          className="mb-5 mx-auto  flex flex-1 flex-row flex-wrap items-center justify-center gap-2 whitespace-nowrap md:gap-5"
+          className="mb-5 mx-auto flex flex-1 text-xs flex-row flex-wrap items-center justify-center gap-2 whitespace-nowrap md:gap-5"
           style={{
-            textShadow:
-              "0 0 3px rgba(255, 215, 0, 1), 0 0 6px rgba(255, 215, 0, 0.8), 0 0 12px rgba(255, 215, 0, 0.6)",
+            textShadow: "0 0 2px rgba(255, 255, 255, 0.1), 0 0 3px rgba(255, 255, 255, 0.1)",
           }}
         >
-          <li className="transition-colors duration-300 hover:text-green-900">
+          <li className="transition-colors duration-300 hover:text-gray-300">
             <Link href="/privacy">Privacy Policy</Link>
           </li>
           |
-          <li className="transition-colors duration-300 hover:text-green-900">
+          <li className="transition-colors duration-300 hover:text-gray-300">
             <Link href="/rules">Terms & Conditions</Link>
           </li>
           |
-          <li className="transition-colors duration-300 hover:text-green-900">
+          <li className="transition-colors duration-300 hover:text-gray-300">
             <Link href="/guidelines">Guidelines</Link>
           </li>
           |
-          <li className="transition-colors duration-300 hover:text-green-900">
+          <li className="transition-colors duration-300 hover:text-gray-300">
             <Link href="/refund">Refund Policy</Link>
           </li>
           |
-          <li className="transition-colors duration-300 hover:text-green-900">
+          <li className="transition-colors duration-300 hover:text-gray-300">
             <Link href="/contact">Contact Us</Link>
           </li>
         </ul>
       )}
       {!show && (
         <p
-          className="text-center mx-auto"
+          className="text-center mx-auto text-sm"
           style={{
-            textShadow:
-              "0 0 3px rgba(255, 215, 0, 1), 0 0 6px rgba(255, 215, 0, 0.8), 0 0 12px rgba(255, 215, 0, 0.6)",
+            textShadow: "0 0 2px rgba(255, 255, 255, 0.1), 0 0 3px rgba(255, 255, 255, 0.1)",
           }}
         >
           <Link
-            className="flex items-center justify-center tracking-normal transition-all hover:tracking-widest hover:text-green-900"
+            className="flex items-center justify-center tracking-normal text-sm transition-all hover:tracking-widest hover:text-gray-300"
             href="/team"
           >
-            Made with &nbsp;<span className="text-red-600">❤</span>&nbsp; by
-            Technical Team
+            Made with &nbsp;<span className="text-red-600 text-sm">❤</span>
+            &nbsp; by Technical Team
           </Link>
-          © Incridea 2025
+          © Incridea {CONSTANT.YEAR}
         </p>
       )}
     </footer>
@@ -143,6 +144,7 @@ export const HomeUi = () => {
         ease: "power1.inOut",
       });
     });
+
   }, []);
 
   return (
@@ -154,7 +156,7 @@ export const HomeUi = () => {
         <div className="absolute h-screen w-screen" data-depth="0.05">
           <div className="absolute top-0 left-1/2 md:-translate-x-[47%] -translate-x-[40%] w-full h-full scale-110 flex justify-center items-center">
             <Image
-              src={"/2025/landing/background.webp"}
+              src={CONSTANT.ASSETS.LANDING.BACKGROUND}
               priority
               alt="Background"
               width={1920}
@@ -170,7 +172,7 @@ export const HomeUi = () => {
         >
           <div className="p-5 w-screen h-screen flex justify-center items-center mb-10 relative">
             <Image
-              src={`/2025/landing/clock.webp`}
+              src={CONSTANT.ASSETS.LANDING.CLOCK}
               priority
               width={640}
               height={640}
@@ -179,7 +181,7 @@ export const HomeUi = () => {
               ref={largeClockRef}
             />
             <Image
-              src={`/2025/landing/clock.webp`}
+              src={CONSTANT.ASSETS.LANDING.CLOCK}
               priority
               width={640}
               height={640}
@@ -209,7 +211,7 @@ export const HomeUi = () => {
         <div className="absolute h-screen w-screen">
           <div className="w-full h-full relative">
             <Image
-              src={"/2025/landing/pillar.webp"}
+              src={CONSTANT.ASSETS.LANDING.PILLAR}
               priority
               alt="Pillar"
               width={1920}
@@ -234,7 +236,11 @@ export const HomeUi = () => {
               className="absolute lg:bottom-0 md:bottom-24 bottom-60 left-[50%] aspect-video w-screen md:scale-[90%] scale-[125%] -translate-x-1/2 -translate-y-16 transition-transform"
             >
               <Image
-                src={`/2025/landing/floatingObjects/${item}.webp`}
+                src={
+                  CONSTANT.ASSETS.LANDING[
+                    `OBJECT${item as 1 | 2 | 3 | 4 | 5 | 6 | 7}`
+                  ]
+                }
                 priority
                 alt="Floating objects"
                 width={1920}
@@ -252,7 +258,7 @@ export const HomeUi = () => {
         >
           <div className="mx-auto w-screen h-screen p-5 relative">
             <Image
-              src={`/2025/logo.png`}
+              src={CONSTANT.ASSETS.PUBLIC.LOGO_BLACK}
               priority
               width={640}
               height={640}
@@ -264,7 +270,7 @@ export const HomeUi = () => {
 
         <div data-depth="0.2" className="absolute w-screen h-screen z-20">
           <Image
-            src={`/2025/eoelogo.png`}
+            src={CONSTANT.ASSETS.LANDING.EOETEXT}
             priority
             width={640}
             height={640}
@@ -272,16 +278,6 @@ export const HomeUi = () => {
             className="md:w-[30%] w-[85%] left-1/2 absolute -translate-x-1/2 md:top-[30%] top-[30%] object-contain object-center"
           />
         </div>
-        {/* <div data-depth="0.05" className="absolute w-screen h-screen z-[19]">
-          <Image
-            src={`/2025/landing/EOEShadow.webp`}
-            priority
-            width={640}
-            height={640}
-            alt="EOE"
-            className="md:w-[30%] w-[70%] left-1/2 absolute -translate-x-1/2 md:top-[40%] top-[50%] object-contain object-center"
-          />
-        </div> */}
 
         <div className="w-screen h-screen z-50 relative select-all pointer-events-auto">
           <div className="bottom-[18%] left-1/2 -translate-x-1/2 absolute flex gap-4">
@@ -306,7 +302,7 @@ export const HomeUi = () => {
 
               <HomeButton
                 onClick={async () => await router.push("/explore")}
-                variant="ghost"
+                variant="default"
               >
                 Explore
               </HomeButton>

@@ -1,39 +1,34 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { Combobox, Transition } from "@headlessui/react";
+import { ComboBox } from "~/components/ui/combobox";
 import Link from "next/link";
 import {
   useState,
-  type FormEventHandler,
-  type FunctionComponent,
   Fragment,
+  type FormEvent,
 } from "react";
 import {
   AiFillEye,
   AiFillEyeInvisible,
-  AiOutlineInfoCircle,
 } from "react-icons/ai";
 import { BiErrorCircle } from "react-icons/bi";
-import { BsChevronExpand } from "react-icons/bs";
 
-import {Button} from "~/components/button/button";
+import { Button } from "~/components/button/button";
 import Spinner from "~/components/spinner";
 import { CONSTANT } from "~/constants";
+import { AuthFormType } from "~/enums";
 import {
   CollegesDocument,
   EmailVerificationDocument,
   SignUpDocument,
 } from "~/generated/generated";
 
-type SignUpFormProps = {
-  setWhichForm: (
-    whichForm: "signIn" | "resetPassword" | "signUp" | "resendEmail",
-  ) => void;
-  setGotDialogBox: (gotDialogBox: boolean) => void;
-};
 
-const SignUpForm: FunctionComponent<SignUpFormProps> = ({
-  setWhichForm,
-  setGotDialogBox,
+const SignUpForm = ({
+  setCurrentForm,
+}: {
+  setCurrentForm: (
+    currentForm: AuthFormType,
+  ) => void;
 }) => {
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -52,63 +47,29 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
   const [signUpMutation, { loading, error: mutationError }] =
     useMutation(SignUpDocument);
 
-  if (mutationError) setGotDialogBox(false);
-
   const [
     emailVerificationMutation,
     { loading: emailVerificationLoading, error: emailVerificationError },
   ] = useMutation(EmailVerificationDocument);
 
-  if (emailVerificationError) setGotDialogBox(true);
-
   const { data: collegeData, loading: collegesLoading } =
     useQuery(CollegesDocument);
-
-  if (emailVerificationError) setGotDialogBox(true);
 
   const sortColleges = () => {
     if (collegeData?.colleges.__typename !== "QueryCollegesSuccess") return [];
 
     const nmamit = collegeData.colleges.data.find(
-      (college) => college.name === CONSTANT.COLLEGE_NAME,
+      (college) => college.id === `${CONSTANT.NMAMIT_COLLEGE_ID}`,
     );
-    const other = collegeData.colleges.data.find(
-      (college) => college.name === "Other",
-    );
-    const sortedColleges = [...(collegeData.colleges.data ?? [])]
-      .filter((college) => {
-        return (
-          college.name !== CONSTANT.COLLEGE_NAME &&
-          college.name !== "Other"
-        );
-      })
-      .sort((a, b) => {
-        return a.name.localeCompare(b.name);
-      });
-    return [nmamit, ...sortedColleges, other];
+
+    return [
+      ...(nmamit ? [nmamit] : []),
+      ...(collegeData.colleges.data.filter((college) => college.id !== `${CONSTANT.NMAMIT_COLLEGE_ID}`))];
   };
 
   const sortedColleges = sortColleges();
 
-  const [selectedCollege, setSelectedCollege] = useState<{
-    name: string;
-    id: string;
-  } | null>({
-    name: "",
-    id: "",
-  });
-
-  const [query, setQuery] = useState("");
-
-  const filteredColleges =
-    query === ""
-      ? sortedColleges
-      : sortedColleges?.filter((college) => {
-        return college?.name
-          .toLowerCase()
-          .replace(/[.,\s]/g, "")
-          .includes(query.toLowerCase().replace(/\s+/g, ""));
-      });
+  const [selectedCollegeId, setSelectedCollegeId] = useState<string>("");
 
   const resendEmail = async () => {
     setEmailSuccess(false);
@@ -119,16 +80,15 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
     }).then((res) => {
       if (res.data?.sendEmailVerification.__typename === "Error") {
         setError(res.data.sendEmailVerification.message);
-        setGotDialogBox(true);
       } else {
         setEmailSuccess(true);
-        setGotDialogBox(true);
       }
     });
   };
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setVerifyError(false);
     setError("");
 
@@ -143,7 +103,12 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
       return;
     }
 
-    if (selectedCollege?.name === CONSTANT.COLLEGE_NAME) {
+    if (selectedCollegeId === "") {
+      setError("Please select a college");
+      return;
+    }
+
+    if (selectedCollegeId === `${CONSTANT.NMAMIT_COLLEGE_ID}`) {
       if (userInfo.email.split("@").length > 1) {
         setError('Please only enter your USN without "@nmamit.in"');
         return;
@@ -163,11 +128,11 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
       return;
     }
 
-    signUpMutation({
+    const { data: signUpData } = await signUpMutation({
       variables: {
         name: userInfo.name,
         email:
-          selectedCollege?.name === CONSTANT.COLLEGE_NAME
+          selectedCollegeId === `${CONSTANT.NMAMIT_COLLEGE_ID}`
             ? `${userInfo.email.trim()}@nmamit.in`
             : userInfo.email,
         password: userInfo.password,
@@ -175,41 +140,45 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
         collegeId: Number(userInfo.college),
       },
     })
-      .then(async (res) => {
-        if (res.data?.signUp.__typename === "MutationSignUpSuccess") {
-          await emailVerificationMutation({
-            variables: {
-              email:
-                selectedCollege?.name === CONSTANT.COLLEGE_NAME
-                  ? `${userInfo.email}@nmamit.in`
-                  : userInfo.email,
-            },
-          }).then((res) => {
-            if (res.data?.sendEmailVerification.__typename === "Error") {
-              setError(res.data.sendEmailVerification.message);
-              setGotDialogBox(true);
-            }
 
-            if (
-              res.data?.sendEmailVerification.__typename ===
-              "MutationSendEmailVerificationSuccess"
-            ) {
-              setEmailSuccess(true);
-              setGotDialogBox(true);
-            }
-          });
-        }
+    if (!signUpData) {
+      setError("An error occurred!");
+      return
+    }
 
-        if (res.data?.signUp.__typename === "Error") {
-          setError(res.data.signUp.message);
-          if (res.data.signUp.message.includes("verify")) setVerifyError(true);
-          setGotDialogBox(true);
-        }
-      })
-      .catch(console.log);
+    if (signUpData.signUp.__typename === "Error") {
+      setError(signUpData.signUp.message);
+      if (signUpData.signUp.message.includes("verify")) setVerifyError(true);
+      return
+    }
+
+    const { data: emailVerifyData } = await emailVerificationMutation({
+      variables: {
+        email:
+          selectedCollegeId === `${CONSTANT.NMAMIT_COLLEGE_ID}`
+            ? `${userInfo.email}@nmamit.in`
+            : userInfo.email,
+      },
+    })
+
+    if (!emailVerifyData) {
+      setError("An error occurred!");
+      return
+    }
+
+    if (emailVerifyData.sendEmailVerification.__typename === "Error") {
+      setError(emailVerifyData.sendEmailVerification.message);
+      return
+    }
+
+    if (typeof window !== "undefined")
+      // Checked in /login route
+      window.localStorage.setItem("user-has-signed-up", "true");
+
+    setEmailSuccess(true);
   };
 
-  // NOTE: change handler for all fields except college
+  // NOTE: changes handler for all fields except college
   const handleChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
@@ -225,8 +194,8 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
       className={`relative flex min-h-full flex-col justify-center gap-3 px-3 py-3 ${loading && "pointer-events-none cursor-not-allowed"
         }`}
     >
-      <p className="mb-2 text-center text-2xl font-semibold">
-        Welcome Time Traveler
+      <p className="mb-2 text-center text-2xl font-medium">
+        Welcome Timekeeper
       </p>
 
       {!emailSuccess && (
@@ -237,111 +206,44 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
             name="name"
             type="text"
             required
-            className={`${selectedCollege?.name === "Other" ? "mt-2" : "mt-2"
-              } border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white md:text-base md:focus:border-[#dd5c6e]`}
+            className="border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white/90 md:text-base md:focus:border-[#dd5c6e]"
             placeholder="Name"
           />
 
-          <Combobox
-            value={selectedCollege}
-            onChange={(value) => {
+          <ComboBox
+            variant="ghost"
+            className="border-0 w-full border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white/90 hover:bg-transparent font-normal hover:text-inherit md:text-base md:focus:border-[#dd5c6e] rounded-none focus-visible:ring-0"
+            popoverClassName="w-full"
+            data={sortedColleges}
+            value={selectedCollegeId}
+            setValue={(value) => {
+              const college =
+                sortedColleges.find((c) => c.id === value) ?? null;
               setUserInfo((prev) => ({
                 ...prev,
-                college: value?.id ?? "",
+                college: college?.id ?? "",
               }));
-              setSelectedCollege(value);
+              setSelectedCollegeId(college?.id ?? "");
             }}
+            placeholder="College"
           >
-            <div className="relative">
-              <div className="relative w-full cursor-default overflow-hidden border-b border-gray-400 md:focus-within:border-[#dd5c6e] md:focus:border-[#dd5c6e]">
-                <Combobox.Input
-                  required
-                  placeholder="College"
-                  displayValue={(college: { name: string }) => college.name}
-                  className="w-full bg-transparent py-2 pl-1 pr-10 text-sm outline-none placeholder:text-white md:text-base"
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                  <BsChevronExpand
-                    className="h-5 w-5 text-gray-100 md:text-gray-400"
-                    aria-hidden="true"
-                  />
-                </Combobox.Button>
-              </div>
-              <Transition
-                as={Fragment}
-                leave="transition ease-in duration-100"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-                afterLeave={() => setQuery("")}
-              >
-                <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                  {collegesLoading ? (
-                    <div className="select-none px-4 py-2 text-center italic">
-                      <Spinner
-                        className="text-[#dd5c6e]"
-                        size={"small"}
-                        intent={"primary"}
-                      />
-                    </div>
-                  ) : filteredColleges?.length === 0 && query !== "" ? (
-                    //FIXME no need to touch
-                    <div className="relative select-none px-4 py-2 text-xs font-semibold text-gray-600 md:text-base">
-                      College not found. Please{" "}
-                      <Link
-                        href="/contact"
-                        className="cursor-pointer underline hover:text-gray-700"
-                      >
-                        contact admin.
-                      </Link>
-                    </div>
-                  ) : (
-                    filteredColleges?.map((college) => (
-                      <Combobox.Option
-                        className={({ active }) =>
-                          `relative cursor-pointer select-none px-4 py-2 text-xs md:text-base ${active
-                            ? "bg-secondary-600 text-white"
-                            : "text-gray-900"
-                          }`
-                        }
-                        key={college?.id}
-                        value={college}
-                      >
-                        {college?.name}
-                      </Combobox.Option>
-                    ))
-                  )}
-                </Combobox.Options>
-              </Transition>
-            </div>
-          </Combobox>
-
-          {selectedCollege?.name === "Other" && (
-            <div className="flex items-center gap-3 rounded-md bg-blue-100 p-2 px-4 font-semibold text-blue-500">
-              <AiOutlineInfoCircle className="shrink-0" />
-              <div>
-                <a className="inline-block text-start text-sm font-normal text-blue-500 transition-colors">
-                  This option is exclusively for invited participants without
-                  access to pronites. If your college is not in the list above
-                  and you are not invited, please{" "}
+            {
+              collegesLoading ?
+                <div className="size-full flex justify-center items-center">
+                  <Spinner />
+                </div>
+                :
+                <div className="select-none text-xs font-semibold text-gray-700 max-w-full md:text-base text-wrap">
+                  College not found. Please{" "}
                   <Link
                     href="/contact"
-                    className="cursor-pointer underline hover:text-blue-700"
+                    className="cursor-pointer underline hover:text-gray-700"
                   >
-                    contact us
+                    contact admin.
                   </Link>
-                  . Refer to the{" "}
-                  <Link
-                    href="/guidelines"
-                    className="cursor-pointer underline hover:text-blue-700"
-                  >
-                    Guidelines
-                  </Link>{" "}
-                  page for more details.
-                </a>
-              </div>
-            </div>
-          )}
+                </div>
+            }
+          </ComboBox>
 
           <div className="relative">
             <input
@@ -349,12 +251,11 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
               onChange={handleChange}
               name="email"
               required
-              className={`${selectedCollege?.name == CONSTANT.COLLEGE_NAME &&
-                "pr-28"
-                } w-full border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white md:text-base md:focus:border-[#dd5c6e]`}
+              className={`${selectedCollegeId == `${CONSTANT.NMAMIT_COLLEGE_ID}` && "pr-28"
+                } w-full border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white/90 md:text-base md:focus:border-[#dd5c6e]`}
               placeholder="Email"
             />
-            {selectedCollege?.name === CONSTANT.COLLEGE_NAME && (
+            {selectedCollegeId === `${CONSTANT.NMAMIT_COLLEGE_ID}` && (
               <span className="absolute right-0 top-0 mr-3 mt-2">
                 @nmamit.in
               </span>
@@ -368,7 +269,7 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
               type={showPassword ? "text" : "password"}
               required
               placeholder="Password"
-              className="w-full border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white md:text-base md:focus:border-[#dd5c6e]"
+              className="w-full border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white/90 md:text-base md:focus:border-[#dd5c6e]"
             />
             <button
               type="button"
@@ -385,7 +286,7 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
             type="text"
             required
             placeholder="Mobile"
-            className="border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white md:text-base md:focus:border-[#dd5c6e]"
+            className="border-b border-gray-400 bg-transparent px-1 py-2 text-sm outline-none transition-all placeholder:text-white/90 md:text-base md:focus:border-[#dd5c6e]"
           />
 
           <div className="flex">
@@ -422,9 +323,12 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
             </label>
           </div>
 
-          <Button className="mt-3 font-life-craft text-lg tracking-widest">Sign Up</Button>
+          <Button className="mt-3 font-life-craft text-lg tracking-widest">
+            Sign Up
+          </Button>
         </>
-      )}
+      )
+      }
 
       {(error ?? mutationError ?? emailVerificationError) && (
         <div className="flex min-w-full items-center gap-3 overflow-x-auto rounded-md bg-primary-900/70 p-2 px-4 font-semibold text-red-500">
@@ -434,7 +338,7 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
             {verifyError && (
               <button
                 type="button"
-                onClick={() => setWhichForm("resendEmail")}
+                onClick={() => setCurrentForm("RESEND_EMAIL")}
                 className="inline-block text-start text-sm font-normal text-red-500 underline transition-colors hover:text-red-700"
               >
                 Click here to resend verification email
@@ -444,39 +348,49 @@ const SignUpForm: FunctionComponent<SignUpFormProps> = ({
         </div>
       )}
 
-      {emailSuccess && (
-        <div className="flex flex-col items-center gap-3 rounded-md bg-primary-900/70 p-4 text-center font-semibold text-secondary-600">
-          <div>
-            Verification email sent to {userInfo.email}
-            {selectedCollege?.name === CONSTANT.COLLEGE_NAME &&
-              "@nmamit.in"}
-            <br />
-            Please check your inbox.
-            <hr className="mx-3 my-2 border-secondary-600" />
-            <div className="text-sm font-normal">
-              <p>Didn&apos;t receive the email?</p>
-              <p>Make sure to check your spam folder.</p>
-              <button
-                type="button"
-                onClick={resendEmail}
-                className="text-sm font-normal text-secondary-400 underline transition-colors hover:font-medium"
-              >
-                Click here to resend it
-              </button>
+      {
+        emailSuccess && (
+          <div className="flex flex-col items-center gap-3 rounded-md bg-primary-900/70 p-4 text-center font-semibold text-secondary-600">
+            <div>
+              Verification email sent to {userInfo.email}
+              {selectedCollegeId === `${CONSTANT.NMAMIT_COLLEGE_ID}` && "@nmamit.in"}
+              <br />
+              Please check your inbox.
+              <hr className="mx-3 my-2 border-secondary-600" />
+              <div className="text-sm font-normal">
+                <p>Didn&apos;t receive the email?</p>
+                <p>Make sure to check your spam folder.</p>
+                <button
+                  type="button"
+                  onClick={resendEmail}
+                  className="text-sm font-normal text-secondary-400 underline transition-colors hover:font-medium"
+                >
+                  Click here to resend it
+                </button>
+              </div>
             </div>
           </div>
+        )
+      }
+
+      {(loading || emailVerificationLoading) && (
+        <div className="absolute inset-0 z-10 flex h-full w-full cursor-not-allowed flex-col items-center justify-center gap-4 rounded-lg opacity-60">
+          <Spinner className="my-0 h-fit text-[#dd5c6e]" intent={"primary"} />
+          {emailVerificationLoading && (
+            <p className="font-semibold">Sending Verification Email</p>
+          )}
         </div>
       )}
 
-      <div className="relative mt-2 flex flex-col text-center">
+      <div className="relative flex flex-col text-center">
         <hr className="my-3 border-accent-50" />
-        <h4 className="absolute right-1/2 top-0.5 mx-auto w-max translate-x-1/2 rounded-full bg-accent-900/90 px-3 text-sm text-accent-50 md:px-2">
+        <h4 className="absolute right-1/2 top-0.5 mx-auto w-max translate-x-1/2 rounded-full bg-accent-900/90 px-5 py-0.5 text-sm text-accent-50">
           Already have an account?
         </h4>
         <Button
           variant={"ghost"}
           onClick={() => {
-            setWhichForm("signIn");
+            setCurrentForm(AuthFormType.SIGN_IN);
           }}
           type="button"
           className="mt-4 font-life-craft text-lg tracking-widest"

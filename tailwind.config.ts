@@ -1,7 +1,8 @@
+import { withUt } from "uploadthing/tw";
 import { type Config } from "tailwindcss";
 import TWA from "tailwindcss-animate";
 
-const config: Config = {
+const config = withUt({
   darkMode: ["class"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx}",
@@ -10,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       transitionDuration: {
-        2000: "2000ms",
+        login: "2500ms",
       },
       animation: {
         "spin-slow": "spin 2s linear infinite",
@@ -340,6 +341,6 @@ const config: Config = {
     },
     plugins: [TWA],
   },
-};
+} satisfies Config)
 
 export default config;
