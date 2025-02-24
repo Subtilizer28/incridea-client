@@ -1,6 +1,4 @@
-import { type NextPage } from "next";
-
-const Privacy: NextPage = () => {
+const Page = () => {
   return (
     <div
       className={`relative min-h-screen overflow-y-auto overflow-x-hidden text-gray-100 p-10 pt-32`}
@@ -129,6 +127,12 @@ const Privacy: NextPage = () => {
             your registration. We use this information only for billing purposes
             and to communicate with you about your registration.
           </p>
+
+          <h2 className="mt-4 text-2xl font-semibold">Eligibility Policy</h2>
+          <p className="mt-2">
+            Registrations are strictly limited to students from engineering colleges. Non-engineering college registrations will not be permitted. In case of any falsified or inaccurate information provided during registration, Incridea&apos;25 reserves the right to cancel the registration without issuing a refund.
+          </p>
+
           <h2 className="mt-4 text-2xl font-semibold">
             Payment Processing and Security
           </h2>
@@ -207,4 +211,4 @@ const Privacy: NextPage = () => {
   );
 };
 
-export default Privacy;
+export default Page;

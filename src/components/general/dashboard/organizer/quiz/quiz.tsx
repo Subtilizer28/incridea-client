@@ -1,16 +1,17 @@
+import { useMutation, useQuery } from "@apollo/client";
+import { Save } from "lucide-react";
 import React from "react";
 import { useEffect, useState } from "react";
-import { generateUUID } from "three/src/math/MathUtils.js";
-import Button from "~/components/button";
 import toast from "react-hot-toast";
+import { BiLoaderAlt } from "react-icons/bi";
+import { generateUUID } from "three/src/math/MathUtils.js";
+
+import Button from "~/components/button";
 import QuestionComp from "~/components/general/dashboard/organizer/quiz/question";
+import Modal from "~/components/modal";
 import { type EventByOrganizerQuery } from "~/generated/generated";
 import { UpdateQuizDocument } from "~/generated/generated";
-import { useMutation, useQuery } from "@apollo/client";
-import { BiLoaderAlt } from "react-icons/bi";
-import { Save } from "lucide-react";
 import { GetQuizByEventRoundDocument } from "~/generated/generated";
-import Modal from "~/components/modal";
 
 // BELOW 4 lines of COMMENTS ARE KINDA NOT USEFUL BECAUSE HYDRATION ERROR HAS BEEN FIXED
 // BUT STILL KEEPING IT FOR REFERENCE
@@ -42,6 +43,7 @@ type QuizDetailsType = {
   startTime: string;
   endTime: string;
   password: string;
+  overridePassword: string;
 };
 
 // function appendMilliseconds(localDateString: string): string {
@@ -64,8 +66,12 @@ function loadfromLocalStore<T>(key: string): T | null {
 }
 
 const Quiz: React.FC<{
-  event: EventByOrganizerQuery["eventByOrganizer"][0];
-  round: EventByOrganizerQuery["eventByOrganizer"][0]["rounds"];
+  event: Extract<EventByOrganizerQuery["eventByOrganizer"], {
+    __typename: "QueryEventByOrganizerSuccess"
+  }>["data"][number];
+  round: Extract<EventByOrganizerQuery["eventByOrganizer"], {
+    __typename: "QueryEventByOrganizerSuccess"
+  }>["data"][number]["rounds"];
 }> = ({ event, round }) => {
   const scrollToBottom = (divId: string) => {
     const targetdiv = document.getElementById(divId);
@@ -103,6 +109,7 @@ const Quiz: React.FC<{
       startTime: new Date().toLocaleString(),
       endTime: new Date().toLocaleString(),
       password: "",
+      overridePassword: "",
     }) ?? {};
 
   const {
@@ -174,6 +181,7 @@ const Quiz: React.FC<{
             startTime: new Date(quiz.data?.startTime).toLocaleString(),
             endTime: new Date(quiz.data?.endTime).toLocaleString(),
             password: quiz.data.password ?? "",
+            overridePassword: quiz.data.overridePassword ?? "",
           };
 
           const loadedQuizId = loadfromLocalStore("quizId");
@@ -366,20 +374,20 @@ const Quiz: React.FC<{
         q.id === id
           ? q.mode === "view"
             ? {
-                ...q,
-                options: q.options.map((opt, i) =>
-                  i === optionIndex ? value : opt,
-                ),
-                answer: q.ansIndex === optionIndex ? value : q.answer,
-                mode: "edit" as const,
-              }
+              ...q,
+              options: q.options.map((opt, i) =>
+                i === optionIndex ? value : opt,
+              ),
+              answer: q.ansIndex === optionIndex ? value : q.answer,
+              mode: "edit" as const,
+            }
             : {
-                ...q,
-                options: q.options.map((opt, i) =>
-                  i === optionIndex ? value : opt,
-                ),
-                answer: q.ansIndex === optionIndex ? value : q.answer,
-              }
+              ...q,
+              options: q.options.map((opt, i) =>
+                i === optionIndex ? value : opt,
+              ),
+              answer: q.ansIndex === optionIndex ? value : q.answer,
+            }
           : q,
       ),
     );
@@ -391,12 +399,12 @@ const Quiz: React.FC<{
         localQuestions?.map((q) =>
           q.id === id
             ? {
-                ...q,
-                options: q.options.map((opt, i) =>
-                  i === optionIndex ? value : opt,
-                ),
-                answer: q.ansIndex === optionIndex ? value : q.answer,
-              }
+              ...q,
+              options: q.options.map((opt, i) =>
+                i === optionIndex ? value : opt,
+              ),
+              answer: q.ansIndex === optionIndex ? value : q.answer,
+            }
             : q,
         ) ?? [],
       );
@@ -432,11 +440,11 @@ const Quiz: React.FC<{
         q.id === id
           ? q.mode === "view"
             ? {
-                ...q,
-                ansIndex: optIndex,
-                answer: q.options[optIndex] ?? "",
-                mode: "edit" as const,
-              }
+              ...q,
+              ansIndex: optIndex,
+              answer: q.options[optIndex] ?? "",
+              mode: "edit" as const,
+            }
             : { ...q, ansIndex: optIndex, answer: q.options[optIndex] ?? "" }
           : q,
       ),
@@ -449,10 +457,10 @@ const Quiz: React.FC<{
         localQuestions?.map((q) =>
           q.id === id
             ? {
-                ...q,
-                ansIndex: optIndex,
-                answer: q.options[optIndex] ?? "",
-              }
+              ...q,
+              ansIndex: optIndex,
+              answer: q.options[optIndex] ?? "",
+            }
             : q,
         ) ?? [],
       );
@@ -580,18 +588,18 @@ const Quiz: React.FC<{
         quizId: quizId,
         questions: localQuestions
           ? localQuestions.map((question) => ({
-              id: question.id,
-              question: question.questionText,
-              isCode: question.isCode,
-              options: question.options.map((opt, index) => ({
-                value: opt,
-                isAnswer: index === question.ansIndex,
-              })),
-              createdAt: question.createdAt,
-              description: question.description,
-              image: question.imageUrl,
-              mode: question.mode,
-            }))
+            id: question.id,
+            question: question.questionText,
+            isCode: question.isCode,
+            options: question.options.map((opt, index) => ({
+              value: opt,
+              isAnswer: index === question.ansIndex,
+            })),
+            createdAt: question.createdAt,
+            description: question.description,
+            image: question.imageUrl,
+            mode: question.mode,
+          }))
           : [],
       },
     }).then((res) => {
@@ -679,11 +687,11 @@ const Quiz: React.FC<{
           size="small"
           showModal={showModal}
         >
-          <div className="pl-6 pr-6 mt-3">
+          <div className="mt-3 pl-6 pr-6">
             Do you really want to discard the draft?
-            <div className="flex justify-center gap-4 mt-6 mb-6">
+            <div className="mb-6 mt-6 flex justify-center gap-4">
               <Button
-                className="rounded-md h-14 w-32 bg-emerald-600 hover:bg-emerald-500 text-amber-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="h-14 w-32 transform rounded-md bg-emerald-600 text-amber-100 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-emerald-500"
                 intent={"dark"}
                 size={"large"}
                 onClick={() => {
@@ -693,7 +701,7 @@ const Quiz: React.FC<{
                 Cancel
               </Button>
               <Button
-                className="rounded-md h-14 w-32 bg-amber-600 hover:bg-amber-500 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="h-14 w-32 transform rounded-md bg-amber-600 text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-amber-500"
                 intent={"danger"}
                 size={"large"}
                 onClick={() => {
@@ -708,22 +716,22 @@ const Quiz: React.FC<{
         </Modal>
       )}
       {quizLoading && (
-        <div className="flex justify-center items-center h-full">
+        <div className="flex h-full items-center justify-center">
           <BiLoaderAlt className="animate-spin text-4xl text-amber-500" />
         </div>
       )}
       <div className="my-12">
         <div className="flex h-auto w-full flex-col items-start rounded-3xl bg-gradient-to-br from-[#002C1D] p-6 px-8 shadow-xl">
-          <div className="flex flex-row w-full justify-between">
+          <div className="flex w-full flex-row justify-between">
             <div className="flex flex-row items-center">
               <label
-                className="self-center font-gilroy text-lg text-amber-300/85"
+                className="font-gilroy self-center text-lg text-amber-300/85"
                 htmlFor="quizTitle"
               >
                 Quiz Title:
               </label>
               <input
-                className="self-center w-80 rounded-2xl ml-4 bg-emerald-900/30 bg-clip-padding p-2 px-4 text-lg font-medium outline-none backdrop-blur-3xl backdrop-filter text-amber-100/70 border border-emerald-700/30"
+                className="ml-4 w-80 self-center rounded-2xl border border-emerald-700/30 bg-emerald-900/30 bg-clip-padding p-2 px-4 text-lg font-medium text-amber-100/70 outline-none backdrop-blur-3xl backdrop-filter"
                 placeholder="Enter quiz title"
                 id="quizTitle"
                 value={quizDetails.quizTitle}
@@ -731,7 +739,7 @@ const Quiz: React.FC<{
               />
             </div>
 
-            <div className="flex flex-row font-gilroy text-xl self-center text-nowrap items-center">
+            <div className="font-gilroy flex flex-row items-center self-center text-nowrap text-xl">
               <label
                 htmlFor="startTime"
                 className="w-full text-lg text-amber-200/85"
@@ -739,7 +747,7 @@ const Quiz: React.FC<{
                 Start Time:
               </label>
               <input
-                className="self-center w-80 rounded-2xl bg-emerald-900/80 bg-clip-padding p-2 px-4 text-lg font-medium backdrop-blur-3xl backdrop-filter text-amber-100/70 border border-emerald-700/30"
+                className="w-80 self-center rounded-2xl border border-emerald-700/30 bg-emerald-900/80 bg-clip-padding p-2 px-4 text-lg font-medium text-amber-100/70 backdrop-blur-3xl backdrop-filter"
                 placeholder="Quiz Start Time"
                 id="startTime"
                 value={quizDetails.startTime}
@@ -747,12 +755,12 @@ const Quiz: React.FC<{
               />
               <label
                 htmlFor="startTime"
-                className="w-full ml-12 text-lg text-amber-200/85"
+                className="ml-12 w-full text-lg text-amber-200/85"
               >
                 End Time:
               </label>
               <input
-                className="self-center w-80 rounded-2xl bg-emerald-900/30 bg-clip-padding p-2 px-4 text-lg font-medium backdrop-blur-3xl backdrop-filter text-amber-100/70 border border-emerald-700/30"
+                className="self-center rounded-2xl border border-emerald-700/30 bg-emerald-900/30 bg-clip-padding p-2 px-4 text-lg font-medium text-amber-100/70 backdrop-blur-3xl backdrop-filter"
                 placeholder="Quiz End Time"
                 id="endTime"
                 value={quizDetails.endTime}
@@ -761,35 +769,52 @@ const Quiz: React.FC<{
             </div>
           </div>
           {quizDetails.description && (
-            <div className="flex flex-row w-full">
+            <div className="flex w-full flex-row">
               <textarea
                 name="quizDescription"
                 id="quizDescription"
                 rows={4}
                 readOnly
-                className="text-lg h-auto w-full mt-4 rounded-3xl  bg-emerald-900/30 bg-clip-padding px-4 py-6 outline-none backdrop-blur-3xl backdrop-filter  text-amber-100/70 border border-emerald-700/20"
+                className="mt-4 h-auto w-full rounded-3xl border border-emerald-700/20 bg-emerald-900/30 bg-clip-padding px-4 py-6 text-lg text-amber-100/70 outline-none backdrop-blur-3xl backdrop-filter"
                 placeholder="Quiz Description"
                 value={quizDetails.description}
               ></textarea>
             </div>
           )}
-          <div className="flex flex-row items-center mt-4">
-            <label
-              className="self-center font-gilroy text-lg text-amber-200/85"
-              htmlFor="quizPassword"
-            >
-              Quiz Password:
-            </label>
-            <input
-              className="self-center w-80 rounded-2xl ml-4 bg-emerald-900/30 bg-clip-padding p-2 px-4 text-lg font-medium outline-none backdrop-blur-3xl backdrop-filter text-amber-100/70 border border-emerald-700/30"
-              placeholder="Enter quiz title"
-              id="quizTitle"
-              value={quizDetails.password}
-              readOnly
-            />
+          <div className="mt-4 flex w-full flex-row items-center justify-between">
+            <div>
+              <label
+                className="font-gilroy self-center text-lg text-amber-200/85"
+                htmlFor="quizPassword"
+              >
+                Quiz Password:
+              </label>
+              <input
+                className="ml-4 w-80 self-center rounded-2xl border border-emerald-700/30 bg-emerald-900/30 bg-clip-padding p-2 px-4 text-lg font-medium text-amber-100/70 outline-none backdrop-blur-3xl backdrop-filter"
+                placeholder="Enter quiz password"
+                id="quizPassword"
+                value={quizDetails.password}
+                readOnly
+              />
+            </div>
+            <div>
+              <label
+                className="font-gilroy self-center text-lg text-amber-200/85"
+                htmlFor="quizOverridePassword"
+              >
+                Override Password:
+              </label>
+              <input
+                className="ml-4 w-80 self-center rounded-2xl border border-emerald-700/30 bg-emerald-900/30 bg-clip-padding p-2 px-4 text-lg font-medium text-amber-100/70 outline-none backdrop-blur-3xl backdrop-filter"
+                placeholder="Enter quiz override password"
+                id="quizOverridePassword"
+                value={quizDetails.overridePassword}
+                readOnly
+              />
+            </div>
           </div>
         </div>
-        <div className="flex flex-col min-h-fit">
+        <div className="flex min-h-fit flex-col">
           {questions.map((q, index) => (
             <QuestionComp
               key={q.id}
@@ -816,10 +841,10 @@ const Quiz: React.FC<{
             />
           ))}
         </div>
-        <div className="flex mt-4 relative justify-between flex-row">
+        <div className="relative mt-4 flex flex-row justify-between">
           <div className="flex gap-12">
             <Button
-              className="rounded-md h-14 w-auto bg-emerald-600 hover:bg-emerald-500 text-amber-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="h-14 w-auto transform rounded-md bg-emerald-600 text-amber-100 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-emerald-500"
               intent={"dark"}
               size={"large"}
               disabled={saved ? true : false}
@@ -828,7 +853,7 @@ const Quiz: React.FC<{
               Discard Draft
             </Button>
             <Button
-              className="rounded-md h-14 w-auto bg-emerald-600 hover:bg-emerald-500 text-amber-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="h-14 w-auto transform rounded-md bg-emerald-600 text-amber-100 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-emerald-500"
               intent={saved ? "info" : "danger"}
               size={"large"}
               disabled={updateQuizLoading}
@@ -849,7 +874,7 @@ const Quiz: React.FC<{
           <Button
             intent={"success"}
             onClick={handleAddQuestions}
-            className=" font-bold rounded-lg h-14 w-auto bg-amber-600 hover:bg-amber-500 text-white transition-all duration-300 transform hover:scale-105 shadow-lg z-50"
+            className="z-50 h-14 w-auto transform rounded-lg bg-amber-600 font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-amber-500"
           >
             Add Question +
           </Button>

@@ -8,6 +8,7 @@ mutation CreateQuiz(
   $password: String = ""
   $points: Int = 1
   $qualifyNext: Int = 5
+  $overridePassword: String = ""
 ) {
   createQuiz(
     endTime: $endTime
@@ -19,6 +20,7 @@ mutation CreateQuiz(
     password: $password
     points: $points
     qualifyNext: $qualifyNext
+    overridePassword: $overridePassword
   ) {
     ... on Error {
       __typename

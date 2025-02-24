@@ -1,11 +1,10 @@
-import { type QueryResult, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { type FC, useState, useEffect, useRef, useCallback } from "react";
 
 import Badge from "~/components/badge";
 import SearchBox from "~/components/searchbox";
 import Spinner from "~/components/spinner";
 import {
-  type BranchesQueryVariables,
   type BranchesQuery,
 } from "~/generated/generated";
 import { SearchUsersDocument } from "~/generated/generated";
@@ -16,10 +15,7 @@ import RemoveBranchRepButton from "./removeBranchRepButton";
 const AddBranchRep: FC<{
   branchId: string;
   branchName: string;
-  branchReps: Extract<
-    NonNullable<
-      QueryResult<BranchesQuery, BranchesQueryVariables>["data"]
-    >["getBranches"],
+  branchReps: Extract<BranchesQuery["getBranches"],
     { __typename: "QueryGetBranchesSuccess" }
   >["data"][number]["branchReps"];
 }> = ({ branchId, branchName, branchReps }) => {

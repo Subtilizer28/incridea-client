@@ -71,7 +71,7 @@ export default function Leaderboard() {
       bronzeCount: college.bronzeCount,
       silverCount: college.silverCount,
     };
-  });
+  }).sort((a, b) => b.totalPoints - a.totalPoints);
 
   const filteredPoints = points.filter((college) => {
     if (eligibilityFilter === "eligible") return college.isEligible;

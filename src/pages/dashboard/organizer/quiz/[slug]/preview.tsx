@@ -1,23 +1,7 @@
 "use client";
 
 //need to add quiz has ended pop up and a timer
-
-import React, { useState, useEffect } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import type { SwiperClass } from "swiper/react";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import { GetQuizByIdDocument } from "~/generated/generated";
-import { Navigation } from "swiper/modules";
-import {
-  type Question,
-  type Options,
-} from "~/pages/event/[slug]/quiz/[quizId]";
 import { useQuery } from "@apollo/client";
-import { EventByOrganizerDocument } from "~/generated/generated";
-import Image from "next/image";
-import styles from "~/components/general/dashboard/organizer/quiz/quiz.module.css";
 // import Prism from "prismjs";
 // import "prismjs/themes/prism-okaidia.css";
 // import "prismjs/components/prism-python";
@@ -28,8 +12,6 @@ import styles from "~/components/general/dashboard/organizer/quiz/quiz.module.cs
 // import "prismjs/components/prism-markup";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
-import { createPortal } from "react-dom";
-
 import {
   Check,
   ChevronLeft,
@@ -37,16 +19,32 @@ import {
   HourglassIcon,
   Maximize2,
   Sliders,
+  Timer,
   X,
-  Timer 
 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import "swiper/css";
 import "swiper/css";
 import "swiper/css/navigation";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import type { SwiperClass } from "swiper/react";
 
-import { useRouter } from "next/router";
-import { useAuth } from "~/hooks/useAuth";
+import {
+  type Options,
+  type Question,
+} from "~/pages/event/[slug]/quiz/[quizId]";
+
 import { HelperTooltip } from "~/components/general/dashboard/organizer/quiz/HelperToolTip";
-
+import styles from "~/components/general/dashboard/organizer/quiz/quiz.module.css";
+import { GetQuizByIdDocument } from "~/generated/generated";
+import { EventByOrganizerDocument } from "~/generated/generated";
+import { useAuth } from "~/hooks/useAuth";
 
 const QuizPage = () => {
   const router = useRouter();
@@ -60,13 +58,9 @@ const QuizPage = () => {
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [quizName, setQuizName] = useState("");
 
-  const { data } = useQuery(EventByOrganizerDocument, {
-    variables: {
-      organizerId: user?.id ?? "0",
-    },
-  });
+  const { data } = useQuery(EventByOrganizerDocument);
 
-  const event = data?.eventByOrganizer.find((event) => event.id === eventId);
+  const event = data?.eventByOrganizer.__typename === "QueryEventByOrganizerSuccess" ? data.eventByOrganizer.data.find((event) => event.id === eventId) : undefined;
   const round = event?.rounds.find((round) => round.roundNo === roundInt);
   const quizId = round?.quiz?.id;
 
@@ -92,7 +86,9 @@ const QuizPage = () => {
 
       setQuizName(qs.name);
 
-      setQuestions(mappedqs);
+      const sortedQuestions = mappedqs.sort(() => Math.random() - 0.5);
+
+      setQuestions(sortedQuestions);
       setProcessedQuizScores(true);
     }
   }, [quizScores, processedQuizScores]);
@@ -213,12 +209,12 @@ const QuizPage = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="relative flex flex-col justify-between items-center text-white select-none">
+    <div className="relative flex select-none flex-col items-center justify-between text-white">
       {isOpen &&
         imageRef.current &&
         createPortal(
           <div
-            className="fixed h-full w-full inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50" // Zoom effect
+            className="fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black/80 backdrop-blur-md" // Zoom effect
           >
             <div
               className="fixed inset-0"
@@ -226,9 +222,9 @@ const QuizPage = () => {
             ></div>
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 bg-black/60 p-2 rounded-full hover:bg-black/80 transition"
+              className="absolute right-4 top-4 rounded-full bg-black/60 p-2 transition hover:bg-black/80"
             >
-              <X className="w-5 h-5 text-white" />
+              <X className="h-5 w-5 text-white" />
             </button>{" "}
             <div
               className="rounded-xl border border-cyan-500/20 transition-transform duration-200 ease-out"
@@ -252,36 +248,36 @@ const QuizPage = () => {
           document.body,
         )}
 
-      <header className="w-3/4 mx-auto mt-16 backdrop-blur-lg bg-black/30 border-b-[1.5px] border-amber-200 border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-yellow-400 via-orange-300 to-amber-400 bg-clip-text text-transparent">
+      <header className="mx-auto mt-16 w-3/4 border-b-[1.5px] border-amber-200 border-white/10 bg-black/30 backdrop-blur-lg">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+          <h1 className="bg-gradient-to-r from-yellow-400 via-orange-300 to-amber-400 bg-clip-text text-xl font-bold text-transparent md:text-2xl lg:text-3xl">
             {quizName}
           </h1>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-2">
-              <Timer  className="w-5 h-5 text-amber-400" />
+              <Timer className="h-5 w-5 text-amber-400" />
               <span className="text-yellow-100">00:00</span>
             </span>
           </div>
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto mt-6 px-4">
-        <div className="w-60 md:w-96 h-3 bg-blue-950/50 rounded-full overflow-hidden">
+      <div className="mx-auto mt-6 max-w-3xl px-4">
+        <div className="h-3 w-60 overflow-hidden rounded-full bg-blue-950/50 md:w-96">
           <div
             className={`relative h-full ${styles.progressBarEffect} ${styles.shimmer}`}
             style={{ width: `${progressPercentage}%` }}
           >
-            <HourglassIcon className="absolute right-0 w-[0.75rem] h-3" />
+            <HourglassIcon className="absolute right-0 h-3 w-[0.75rem]" />
           </div>
         </div>
-        <p className=" text-center text-[1rem] text-lime-200 mt-2">
+        <p className="mt-2 text-center text-[1rem] text-lime-200">
           Question {currentSlide + 1} of {questions.length}
         </p>
       </div>
 
       {/* Main Content with Swiper */}
-      <main className="w-[90%] md:w-3/4 mx-auto mt-8 px-2">
+      <main className="mx-auto mt-8 w-[90%] px-2 md:w-3/4">
         <Swiper
           onSwiper={setSwiper}
           modules={[Navigation]}
@@ -293,15 +289,15 @@ const QuizPage = () => {
         >
           {questions.map((question, index) => (
             <SwiperSlide key={index}>
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-cyan-500/20">
-                <div className=" flex flex-col gap-4 lg:flex-row">
-                  <div className="lg:w-1/2 flex flex-col justify-evenly gap-6 border-[1.5px] border-amber-200 p-3 rounded-3xl">
+              <div className="rounded-2xl border border-cyan-500/20 bg-white/10 p-4 shadow-xl backdrop-blur-md">
+                <div className="flex flex-col gap-4 lg:flex-row">
+                  <div className="flex flex-col justify-evenly gap-6 rounded-3xl border-[1.5px] border-amber-200 p-3 lg:w-1/2">
                     <div className="flex gap-2 -space-y-[0.5px]">
-                      <span className="font-bold text-[1rem] sm:text-lg bg-gradient-to-tr from-amber-200 via-yellow-500 to-orange-200 text-transparent bg-clip-text">
+                      <span className="bg-gradient-to-tr from-amber-200 via-yellow-500 to-orange-200 bg-clip-text text-[1rem] font-bold text-transparent sm:text-lg">
                         {" "}
                         Q{index + 1 + ". "}
                       </span>
-                      <p className="text-pretty text-[1rem] sm:text-lg font-medium">
+                      <p className="text-pretty text-[1rem] font-medium sm:text-lg">
                         {question.question}
                       </p>
                     </div>
@@ -320,11 +316,11 @@ const QuizPage = () => {
                       </>
                     )}
                     {question.description && question.isCode && (
-                      <div className="bg-teal-950/50 rounded-xl p-4 border border-cyan-500/20 shadow-lg">
-                        <h3 className="text-amber-300 mb-2 font-semibold">
+                      <div className="rounded-xl border border-cyan-500/20 bg-teal-950/50 p-4 shadow-lg">
+                        <h3 className="mb-2 font-semibold text-amber-300">
                           Code:
                         </h3>
-                        <pre className="p-0 m-0 bg-transparent overflow-x-auto rounded-md">
+                        <pre className="m-0 overflow-x-auto rounded-md bg-transparent p-0">
                           <code className="bg-transparent">
                             {question.description}
                           </code>
@@ -333,22 +329,21 @@ const QuizPage = () => {
                     )}
 
                     {question.description && !question.isCode && (
-                      <div className="bg-blue-950/50 rounded-xl p-4 border border-cyan-500/20">
-                        <h3 className="text-amber-300 mb-2">Description:</h3>
+                      <div className="rounded-xl border border-cyan-500/20 bg-blue-950/50 p-4">
+                        <h3 className="mb-2 text-amber-300">Description:</h3>
                         <p className="text-amber-50">{question.description}</p>
                       </div>
                     )}
                   </div>
-                  <div className="w-full sm:grid sm:grid-cols-2 lg:flex flex-col mx-auto lg:w-1/2 items-center justify-center gap-y-4 gap-x-6 border-[1.5px] border-amber-200 p-3 rounded-3xl">
+                  <div className="mx-auto w-full flex-col items-center justify-center gap-x-6 gap-y-4 rounded-3xl border-[1.5px] border-amber-200 p-3 sm:grid sm:grid-cols-2 lg:flex lg:w-1/2">
                     {question.options.map((option, optionIndex) => (
                       <button
                         key={option.id}
                         onClick={() => handleOptionSelect(option)}
-                        className={`my-4 sm:m-0 flex gap-2 w-full min-h-24 p-3 text-pretty rounded-xl text-left transition-all border ${
-                          selectedAnswers.find((a) => a.id === option.id)
-                            ? "bg-gradient-to-r from-amber-300 to-yellow-400 border-transparent"
-                            : "bg-green-900/40 border-cyan-500/20 hover:bg-emerald-900/40"
-                        }`}
+                        className={`my-4 flex min-h-24 w-full gap-2 text-pretty rounded-xl border p-3 text-left transition-all sm:m-0 ${selectedAnswers.find((a) => a.id === option.id)
+                          ? "border-transparent bg-gradient-to-r from-amber-300 to-yellow-400"
+                          : "border-cyan-500/20 bg-green-900/40 hover:bg-emerald-900/40"
+                          }`}
                       >
                         <span
                           className={`font-bold ${selectedAnswers.find((a) => a.id === option.id) ? "text-lime-300" : "text-amber-400"}`}
@@ -359,37 +354,35 @@ const QuizPage = () => {
                       </button>
                     ))}
                   </div>
-                  <div className="hidden md:flex lg:flex-col items-center gap-2 justify-center">
+                  <div className="hidden items-center justify-center gap-2 md:flex lg:flex-col">
                     <button
                       onClick={handlePrevTrackerPage}
                       disabled={trackerPage === 0}
-                      className={`p-1 rounded-full transition-all ${
-                        trackerPage === 0
-                          ? "text-gray-500 cursor-not-allowed"
-                          : "text-lime-200 hover:bg-white/10"
-                      }`}
+                      className={`rounded-full p-1 transition-all ${trackerPage === 0
+                        ? "cursor-not-allowed text-gray-500"
+                        : "text-lime-200 hover:bg-white/10"
+                        }`}
                     >
-                      <ChevronLeft className="w-5 h-5 lg:rotate-90" />
+                      <ChevronLeft className="h-5 w-5 lg:rotate-90" />
                     </button>
 
-                    <div className="bg-emerald-950/60 rounded-3xl border-t border-cyan-500/20 px-2 flex lg:flex-col lg:h-[20rem] justify-center gap-2 overflow-x-hidden">
+                    <div className="flex justify-center gap-2 overflow-x-hidden rounded-3xl border-t border-cyan-500/20 bg-emerald-950/60 px-2 lg:h-[20rem] lg:flex-col">
                       {visibleQuestions.map((_, index) => {
                         const questionNumber = startIndex + index;
                         return (
                           <button
                             key={questionNumber}
                             onClick={() => swiper?.slideTo(questionNumber)}
-                            className={`w-10 h-10 flex items-center justify-center flex-shrink-0 rounded-full font-medium transition-all ${
-                              currentSlide === questionNumber
-                                ? "bg-gradient-to-r from-green-800 via-emerald-700 to-lime-800"
-                                : selectedAnswers.find(
-                                      (a) =>
-                                        a.questionId ===
-                                        questions[questionNumber]?.id,
-                                    )
-                                  ? "bg-amber-600"
-                                  : "bg-emerald-950/50"
-                            }`}
+                            className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full font-medium transition-all ${currentSlide === questionNumber
+                              ? "bg-gradient-to-r from-green-800 via-emerald-700 to-lime-800"
+                              : selectedAnswers.find(
+                                (a) =>
+                                  a.questionId ===
+                                  questions[questionNumber]?.id,
+                              )
+                                ? "bg-amber-600"
+                                : "bg-emerald-950/50"
+                              }`}
                           >
                             {questionNumber + 1}
                           </button>
@@ -400,13 +393,12 @@ const QuizPage = () => {
                     <button
                       onClick={handleNextTrackerPage}
                       disabled={trackerPage >= totalPages - 1}
-                      className={`p-1 rounded-full transition-all ${
-                        trackerPage >= totalPages - 1
-                          ? "text-gray-500 cursor-not-allowed"
-                          : "text-lime-200 hover:bg-white/10"
-                      }`}
+                      className={`rounded-full p-1 transition-all ${trackerPage >= totalPages - 1
+                        ? "cursor-not-allowed text-gray-500"
+                        : "text-lime-200 hover:bg-white/10"
+                        }`}
                     >
-                      <ChevronRight className="w-5 h-5 lg:rotate-90" />
+                      <ChevronRight className="h-5 w-5 lg:rotate-90" />
                     </button>
                   </div>
                 </div>
@@ -416,14 +408,13 @@ const QuizPage = () => {
         </Swiper>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between m-4">
+        <div className="m-4 flex justify-between">
           <button
             onClick={handlePrevSlide}
-            className={`w-26 md:w-32 px-4 py-2 rounded-md shadow-md transition-all ${styles.glassButton} ${
-              currentSlide > 0
-                ? "bg-transparent border border-amber-100 text-white"
-                : "opacity-0 cursor-auto"
-            }`}
+            className={`w-26 rounded-md px-4 py-2 shadow-md transition-all md:w-32 ${styles.glassButton} ${currentSlide > 0
+              ? "border border-amber-100 bg-transparent text-white"
+              : "cursor-auto opacity-0"
+              }`}
             disabled={currentSlide === 0}
           >
             Previous
@@ -431,27 +422,26 @@ const QuizPage = () => {
 
           <button
             onClick={handleNextSlide}
-            className={`w-20 md:w-32 px-4 py-2 rounded-md shadow-md transition-all ${styles.glassButton} ${
-              currentSlide < questions.length - 1
-                ? "bg-transparent border border-amber-100 text-white"
-                : "opacity-0 cursor-auto"
-            }`}
+            className={`w-20 rounded-md px-4 py-2 shadow-md transition-all md:w-32 ${styles.glassButton} ${currentSlide < questions.length - 1
+              ? "border border-amber-100 bg-transparent text-white"
+              : "cursor-auto opacity-0"
+              }`}
             disabled={currentSlide === questions.length - 1}
           >
             Next
           </button>
         </div>
-        <div className="hidden md:flex w-[90%] px-2 py-1 md:p-4 justify-center gap-4 md:flex-col">
+        <div className="hidden w-[90%] justify-center gap-4 px-2 py-1 md:flex md:flex-col md:p-4">
           <div className="ctrl-btns flex justify-evenly gap-4">
             <button
               onClick={() => setIsReviewOpen(true)}
-              className="max-w-48 flex-1 py-3 rounded-xl bg-gradient-to-r from-green-700 to-lime-600/70 border-[1.25px] border-amber-200 font-medium hover:opacity-90 transition-all duration-300 ease-in-out"
+              className="max-w-48 flex-1 rounded-xl border-[1.25px] border-amber-200 bg-gradient-to-r from-green-700 to-lime-600/70 py-3 font-medium transition-all duration-300 ease-in-out hover:opacity-90"
             >
               Review Quiz
             </button>
             <button
               onClick={() => setIsSubmitDialogOpen(true)}
-              className="max-w-48 flex-1 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-400 border-[1.25px] border-amber-200 font-medium hover:opacity-90 transition-all duration-300 ease-in-out"
+              className="max-w-48 flex-1 rounded-xl border-[1.25px] border-amber-200 bg-gradient-to-r from-yellow-400 to-orange-400 py-3 font-medium transition-all duration-300 ease-in-out hover:opacity-90"
             >
               Submit Quiz
             </button>
@@ -459,49 +449,46 @@ const QuizPage = () => {
         </div>
       </main>
       {/* Question Navigator */}
-      <div className="block md:hidden absolute top-[7.25rem] right-1 z-50 cursor-pointer">
+      <div className="absolute right-1 top-[7.25rem] z-50 block cursor-pointer md:hidden">
         {!quizTrackerVisible && <HelperTooltip />}
         <span onClick={() => setQuizTrackerVisible(!quizTrackerVisible)}>
           <Sliders
-            className={`w-8 h-8 p-1 border-secondary-50 border-2 text-slate-50 rounded-3xl ${
-              quizTrackerVisible ? "rotate-90" : "-rotate-90"
-            }`}
+            className={`h-8 w-8 rounded-3xl border-2 border-secondary-50 p-1 text-slate-50 ${quizTrackerVisible ? "rotate-90" : "-rotate-90"
+              }`}
           />
         </span>
       </div>
       <div
-        className={`${styles.quizNav} flex md:hidden h-[24%] sm:h-[32%] p-2 bg-green-900 rounded-3xl border-t border-cyan-500/20 my-6 ${!quizTrackerVisible && "hidden"}`}
+        className={`${styles.quizNav} my-6 flex h-[24%] rounded-3xl border-t border-cyan-500/20 bg-green-900 p-2 sm:h-[32%] md:hidden ${!quizTrackerVisible && "hidden"}`}
       >
-        <div className="flex items-center gap-2 justify-center">
+        <div className="flex items-center justify-center gap-2">
           <button
             onClick={handlePrevTrackerPage}
             disabled={trackerPage === 0}
-            className={`p-1 rounded-full transition-all ${
-              trackerPage === 0
-                ? "text-gray-500 cursor-not-allowed"
-                : "text-cyan-400 hover:bg-white/10"
-            }`}
+            className={`rounded-full p-1 transition-all ${trackerPage === 0
+              ? "cursor-not-allowed text-gray-500"
+              : "text-cyan-400 hover:bg-white/10"
+              }`}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <div className="bg-emerald-950/60 rounded-3xl border-t border-cyan-500/20 px-2 flex flex-col gap-2 overflow-x-hidden">
+          <div className="flex flex-col gap-2 overflow-x-hidden rounded-3xl border-t border-cyan-500/20 bg-emerald-950/60 px-2">
             {visibleQuestions.map((_, index) => {
               const questionNumber = startIndex + index;
               return (
                 <button
                   key={questionNumber}
                   onClick={() => swiper?.slideTo(questionNumber)}
-                  className={`w-10 h-10 flex items-center justify-center flex-shrink-0 rounded-full font-medium transition-all ${
-                    currentSlide === questionNumber
-                      ? "bg-gradient-to-r from-green-800 via-emerald-700 to-lime-800"
-                      : selectedAnswers.find(
-                            (a) =>
-                              a.questionId === questions[questionNumber]?.id,
-                          )
-                        ? "bg-amber-600"
-                        : "bg-emerald-950/50"
-                  }`}
+                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full font-medium transition-all ${currentSlide === questionNumber
+                    ? "bg-gradient-to-r from-green-800 via-emerald-700 to-lime-800"
+                    : selectedAnswers.find(
+                      (a) =>
+                        a.questionId === questions[questionNumber]?.id,
+                    )
+                      ? "bg-amber-600"
+                      : "bg-emerald-950/50"
+                    }`}
                 >
                   {questionNumber + 1}
                 </button>
@@ -512,26 +499,25 @@ const QuizPage = () => {
           <button
             onClick={handleNextTrackerPage}
             disabled={trackerPage >= totalPages - 1}
-            className={`p-1 rounded-full transition-all ${
-              trackerPage >= totalPages - 1
-                ? "text-gray-500 cursor-not-allowed"
-                : "text-cyan-400 hover:bg-white/10"
-            }`}
+            className={`rounded-full p-1 transition-all ${trackerPage >= totalPages - 1
+              ? "cursor-not-allowed text-gray-500"
+              : "text-cyan-400 hover:bg-white/10"
+              }`}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
-        <div className="w-full px-2 py-1 md:p-4 gap-4 md:flex-col">
-          <div className="flex flex-col ctrl-btns items-center justify-center gap-4 p-4">
+        <div className="w-full gap-4 px-2 py-1 md:flex-col md:p-4">
+          <div className="ctrl-btns flex flex-col items-center justify-center gap-4 p-4">
             <button
               onClick={() => setIsReviewOpen(true)}
-              className="w-full flex-1 py-3 rounded-xl bg-gradient-to-r from-green-700 to-lime-600/70 border-[1.25px] border-amber-200 font-medium hover:opacity-90 transition-all"
+              className="w-full flex-1 rounded-xl border-[1.25px] border-amber-200 bg-gradient-to-r from-green-700 to-lime-600/70 py-3 font-medium transition-all hover:opacity-90"
             >
               Review Quiz
             </button>
             <button
               onClick={() => setIsSubmitDialogOpen(true)}
-              className="w-full flex-1 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-400 border-[1.25px] border-lime-100 font-medium hover:opacity-90 transition-all"
+              className="w-full flex-1 rounded-xl border-[1.25px] border-lime-100 bg-gradient-to-r from-yellow-400 to-orange-400 py-3 font-medium transition-all hover:opacity-90"
             >
               Submit Quiz
             </button>
@@ -541,26 +527,26 @@ const QuizPage = () => {
 
       {/* Review Modal */}
       {isReviewOpen && (
-        <div className="fixed inset-0 bg-emerald-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-tr from-emerald-800 to-green-800 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-amber-500/20">
-            <div className="sticky top-0 backdrop-blur-md bg-gradient-to-tr bg-emerald-700 p-4 border-b border-amber-500/80 flex justify-between items-center shadow-md">
-              <h2 className="text-2xl mx-auto font-bold bg-gradient-to-r from-orange-300 via-amber-300 to-yellow-200 bg-clip-text text-transparent">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/90 p-4 backdrop-blur-sm">
+          <div className="max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-amber-500/20 bg-gradient-to-tr from-emerald-800 to-green-800">
+            <div className="sticky top-0 flex items-center justify-between border-b border-amber-500/80 bg-emerald-700 bg-gradient-to-tr p-4 shadow-md backdrop-blur-md">
+              <h2 className="mx-auto bg-gradient-to-r from-orange-300 via-amber-300 to-yellow-200 bg-clip-text text-2xl font-bold text-transparent">
                 Review Your Answers
               </h2>
               <button
                 onClick={() => setIsReviewOpen(false)}
-                className="p-2 hover:bg-white/10 rounded-full border-2 border-amber-200/50 text-amber-300"
+                className="rounded-full border-2 border-amber-200/50 p-2 text-amber-300 hover:bg-white/10"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-4 space-y-6">
+            <div className="space-y-6 p-4">
               {questions.map((question, index) => (
                 <div
                   key={index}
-                  className="bg-emerald-950/50 rounded-xl p-4 border border-amber-500/20"
+                  className="rounded-xl border border-amber-500/20 bg-emerald-950/50 p-4"
                 >
-                  <h3 className="font-medium mb-4 text-amber-200">
+                  <h3 className="mb-4 font-medium text-amber-200">
                     Q{index + 1}. {question.question}
                   </h3>
 
@@ -570,22 +556,22 @@ const QuizPage = () => {
                       height={300}
                       src={question.image}
                       alt="Question"
-                      className="mx-auto w-3/4 rounded-xl mb-4 border border-amber-500/20"
+                      className="mx-auto mb-4 w-3/4 rounded-xl border border-amber-500/20"
                     />
                   )}
 
                   {question.description && question.isCode && (
-                    <div className="bg-emerald-900 rounded-xl p-4 mb-4 border border-amber-500/20">
-                      <h4 className="text-amber-300 mb-2">Code:</h4>
-                      <pre className="text-amber-50 overflow-x-auto">
+                    <div className="mb-4 rounded-xl border border-amber-500/20 bg-emerald-900 p-4">
+                      <h4 className="mb-2 text-amber-300">Code:</h4>
+                      <pre className="overflow-x-auto text-amber-50">
                         <code>{question.description}</code>
                       </pre>
                     </div>
                   )}
 
                   {question.description && !question.isCode && (
-                    <div className="bg-emerald-800/90 rounded-xl p-4 mb-4 border border-amber-500/20">
-                      <h4 className="text-amber-300 mb-2">Description:</h4>
+                    <div className="mb-4 rounded-xl border border-amber-500/20 bg-emerald-800/90 p-4">
+                      <h4 className="mb-2 text-amber-300">Description:</h4>
                       <p className="text-amber-50">{question.description}</p>
                     </div>
                   )}
@@ -594,11 +580,10 @@ const QuizPage = () => {
                     {question.options.map((option, optionIndex) => (
                       <div
                         key={option.id}
-                        className={`p-3 rounded-lg ${
-                          selectedAnswers.find((a) => a.id === option.id)
-                            ? "bg-gradient-to-r from-amber-500 to-orange-400 border-transparent"
-                            : "bg-emerald-900 border border-amber-500/20"
-                        }`}
+                        className={`rounded-lg p-3 ${selectedAnswers.find((a) => a.id === option.id)
+                          ? "border-transparent bg-gradient-to-r from-amber-500 to-orange-400"
+                          : "border border-amber-500/20 bg-emerald-900"
+                          }`}
                       >
                         <span className="font-bold text-emerald-400">
                           {String.fromCharCode(65 + optionIndex)}.{" "}
@@ -615,22 +600,22 @@ const QuizPage = () => {
       )}
 
       {isSubmitDialogOpen && (
-        <div className="fixed inset-0 bg-emerald-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className=" bg-gradient-to-b from-emerald-900 to-green-900 rounded-2xl p-6 max-w-md w-full border border-amber-500/20">
-            <h2 className=" text-xl font-bold bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-500/90 bg-clip-text text-transparent">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/90 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-amber-500/20 bg-gradient-to-b from-emerald-900 to-green-900 p-6">
+            <h2 className="bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-500/90 bg-clip-text text-xl font-bold text-transparent">
               Confirm Submission
             </h2>
             <p className="text-amber-100">
               Are you sure you want to submit your answers?
             </p>
-            <div className="flex justify-end gap-x-3 mt-4">
+            <div className="mt-4 flex justify-end gap-x-3">
               <button
                 onClick={() => setIsSubmitDialogOpen(false)}
-                className="mr-2 py-2 px-4 rounded-xl bg-red-600/75 border-[1.25px] border-amber-500 hover:opacity-80 text-white transition-colors duration-200 ease-in-out"
+                className="mr-2 rounded-xl border-[1.25px] border-amber-500 bg-red-600/75 px-4 py-2 text-white transition-colors duration-200 ease-in-out hover:opacity-80"
               >
                 Cancel
               </button>
-              <button className="py-2 px-4 rounded-xl bg-lime-700/70 hover:bg-lime-700/50 border-[1.25px] border-amber-500 text-white transition-colors  duration-200 ease-in-out">
+              <button className="rounded-xl border-[1.25px] border-amber-500 bg-lime-700/70 px-4 py-2 text-white transition-colors duration-200 ease-in-out hover:bg-lime-700/50">
                 Submit Quiz
               </button>
             </div>

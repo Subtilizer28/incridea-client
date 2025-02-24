@@ -29,11 +29,11 @@ export default function EventStatusCard() {
   );
 
   const getStatusColor = (status: string) => {
-    if (status === "COMPLETED") return "text-green-500";
-    if (status === "YET_TO_START") return "text-red-500";
-    if (status.startsWith("ROUND") && status.includes("ONGOING"))
-      return "text-yellow-500";
-    return "text-gray-500";
+    if (status.includes("ONGOING")) return "text-yellow-500";
+    if (status.includes("YET TO START") && status.includes("DONE")) return "text-orange-500";
+    if (status.includes("COMPLETED") || status.includes("DONE")) return "text-green-500";
+    if (status.includes("YET TO START")) return "text-red-400";
+    return "text-red-200";
   };
 
   const handleSearchClose = () => {
@@ -100,10 +100,15 @@ export default function EventStatusCard() {
           >
             <div className="w-3/12 px-4 text-white">{index + 1}</div>
             <div className="w-5/12 px-4 text-white">{event.eventName}</div>
-            <div
-              className={`w-4/12 px-4 text-center font-semibold ${getStatusColor(event.status)}`}
-            >
-              {event.status}
+            <div className="w-4/12 px-4 text-center font-semibold overflow-hidden relative">
+              {event.status.split(",").map((part, index) => {
+                const trimmedPart = part.trim();
+                return (
+                  <div key={index} className={`${getStatusColor(trimmedPart)} my-1`}>
+                    {trimmedPart}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}

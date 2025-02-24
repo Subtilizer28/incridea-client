@@ -25,7 +25,7 @@ const ReactQuill = dynamic(() => import("react-quill"), {
 export default function EditEventModal({
   event,
 }: {
-  event: EventByOrganizerQuery["eventByOrganizer"][0];
+  event: Extract<EventByOrganizerQuery["eventByOrganizer"], { __typename: "QueryEventByOrganizerSuccess" }>["data"][number];
 }) {
   const [maxTeams, setMaxTeams] = useState(event.maxTeams);
   const [name, setName] = useState(event.name);

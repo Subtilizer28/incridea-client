@@ -11,17 +11,23 @@ import { useAuth } from "~/hooks/useAuth";
 const Organizer: NextPage = () => {
   const router = useRouter();
   const { user, loading } = useAuth();
+
   if (loading)
     return (
       <div className="flex h-screen w-screen justify-center">
         <Spinner />
       </div>
     );
+
   if (!user) {
     void router.push("/login");
     return <div>Redirecting...</div>;
   }
-  if (user && user.role !== Role.Organizer) void router.push("/profile");
+
+  if (user.role !== Role.Organizer && user.role !== Role.Admin) {
+    void router.push("/profile");
+    return null
+  }
 
   return (
     <Dashboard>
@@ -30,7 +36,7 @@ const Organizer: NextPage = () => {
         <h1 className="mb-3 text-3xl">
           Hello <span className="font-semibold">{user?.name}</span>!
         </h1>
-        <OrganizerTab organizerId={user.id} />
+        <OrganizerTab />
       </div>
     </Dashboard>
   );

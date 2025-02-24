@@ -68,10 +68,9 @@ const AddEventModal: FC<{
       >
         <form
           onSubmit={handleAddEvent}
-          className={`flex flex-col gap-5 p-4 md:p-6 ${
-            createEventLoading &&
+          className={`flex flex-col gap-5 p-4 md:p-6 ${createEventLoading &&
             "pointer-events-none cursor-not-allowed opacity-50"
-          }}`}
+            }}`}
         >
           <div className="flex items-center gap-3">
             <label className="basis-1/5" htmlFor="eventName">

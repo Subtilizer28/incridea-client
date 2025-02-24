@@ -1,0 +1,12 @@
+query JudgeCountByJudge {
+  judgeCountByJudge {
+    ... on Error {
+      __typename
+      message
+    }
+    ... on QueryJudgeCountByJudgeSuccess {
+      __typename
+      data
+    }
+  }
+}

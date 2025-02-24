@@ -4,7 +4,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import * as THREE from "three";
 import MasalaModel from "~/components/pronite/masala_coffee";
@@ -13,37 +13,25 @@ import Screen from "~/components/pronite/screen";
 import Shaan from "~/components/pronite/shaan";
 
 import {
-  Box,
   MeshReflectorMaterial,
-  useAnimations,
   useGLTF,
   useTexture,
-  useVideoTexture,
 } from "@react-three/drei";
 import {
   Canvas,
-  Euler,
-  ExtendedColors,
-  Layers,
-  Matrix4,
-  NodeProps,
-  NonFunctionKeys,
-  Overwrite,
-  Quaternion,
   useFrame,
   useThree,
-  Vector3,
 } from "@react-three/fiber";
 
 import Image from "next/image";
-import { EventHandlers } from "@react-three/fiber/dist/declarations/src/core/events";
 import { CONSTANT } from "~/constants";
+import ProniteRules from "~/components/pronite/rules";
 
 const videos = [
   "https://res.cloudinary.com/dlr9tbqlk/video/upload/v1739986328/shaan_o0nrcg.mp4",
-
   "https://res.cloudinary.com/dlr9tbqlk/video/upload/v1739986369/masalacoffee_hcllsc.mp4",
 ];
+
 const songs = [
   "https://res.cloudinary.com/dlr9tbqlk/video/upload/v1739986245/Chaar_Kadam_c0n5f0.mp3",
   "https://res.cloudinary.com/dlr9tbqlk/video/upload/v1739986244/Musu_Musu_t05ryd.mp3",
@@ -107,16 +95,14 @@ export default function App() {
   }, []);
 
   const [activeGradient, setActiveGradient] = useState<"blue" | "red">("blue");
+
   const handleBlueClick = () => {
     setActiveGradient("blue");
-    console.log("Blue gradient activated");
     setLightC("#00FFFF");
   };
 
   const handleRedClick = () => {
     setActiveGradient("red");
-    console.log("Red gradient activated");
-    const lights = document.querySelectorAll("pointLight");
     setLightC("#FF0000");
   };
 
@@ -146,8 +132,6 @@ export default function App() {
   const handleInfoToggle = () => {
     setShowInfo(!showInfo);
   };
-
-  console.log(videos[video]);
 
   const getRandomShaanSong = () => Math.floor(Math.random() * 3);
   const getRandomMasalaSong = () => Math.floor(3 + Math.random() * 2);
@@ -219,11 +203,10 @@ export default function App() {
               <button
                 onClick={handleAudioToggle}
                 className={`px-2 py-2 rounded-full font-medium text-md shadow-lg transition-all duration-300 hover:scale-105 lg:text-2xl lg:px-5
-              ${
-                isAudioOn
-                  ? "bg-gradient-to-r from-pink-300 to-pink-200 text-white"
-                  : "bg-white/20 backdrop-blur-sm text-gray-100 "
-              }`}
+              ${isAudioOn
+                    ? "bg-gradient-to-r from-pink-300 to-pink-200 text-white"
+                    : "bg-white/20 backdrop-blur-sm text-gray-100 "
+                  }`}
               >
                 {isAudioOn ? "🔊" : "🔈"}
               </button>
@@ -231,11 +214,10 @@ export default function App() {
               <button
                 onClick={handleLightsToggle}
                 className={`px-2 py-2 ml-4 rounded-full font-medium text-md shadow-lg transition-all duration-300 hover:scale-105 lg:text-2xl lg:px-5
-              ${
-                actLight
-                  ? "bg-gradient-to-r from-yellow-400 to-yellow-100 text-white"
-                  : "bg-white/20 backdrop-blur-sm text-gray-100 "
-              }`}
+              ${actLight
+                    ? "bg-gradient-to-r from-yellow-400 to-yellow-100 text-white"
+                    : "bg-white/20 backdrop-blur-sm text-gray-100 "
+                  }`}
               >
                 💡
               </button>
@@ -251,9 +233,8 @@ export default function App() {
             <div className="flex justify-end gap-2 items-end">
               <div
                 onClick={handleBlueClick}
-                className={`items-start bg-gradient-to-t from-cyan-400 from-0% via-teal-500/40 via-30% to-transparent to-80% h-full rounded-md cursor-pointer transition-all duration-300 ${
-                  activeGradient === "blue" ? "w-[75%] pr-28" : "w-[25%] pr-4"
-                }`}
+                className={`items-start bg-gradient-to-t from-cyan-400 from-0% via-teal-500/40 via-30% to-transparent to-80% h-full rounded-md cursor-pointer transition-all duration-300 ${activeGradient === "blue" ? "w-[75%] pr-28" : "w-[25%] pr-4"
+                  }`}
               >
                 <Image
                   width={400}
@@ -264,9 +245,8 @@ export default function App() {
               </div>
               <div
                 onClick={handleRedClick}
-                className={` bg-gradient-to-t  from-red-600 from-0% via-orange-700/40 via-30% to-transparent to-80% h-full rounded-md cursor-pointer transition-all duration-300 ${
-                  activeGradient === "red" ? "w-[75%] pl-16" : "w-[25%] pl-0"
-                }`}
+                className={` bg-gradient-to-t  from-red-600 from-0% via-orange-700/40 via-30% to-transparent to-80% h-full rounded-md cursor-pointer transition-all duration-300 ${activeGradient === "red" ? "w-[75%] pl-16" : "w-[25%] pl-0"
+                  }`}
               >
                 <Image
                   width={400}
@@ -278,17 +258,15 @@ export default function App() {
             </div>
           </div>
           <div
-            className={`fixed pointer-events-none bottom-12 ml-4 pl-2 leading-none w-[calc(75%-30px)] bg-gradient-to-t from-teal-700 from-0% to-teal-400/0 to-100% rounded-r-sm rounded-b-none pb-1 pt-4 pr-3 z-50 flex flex-col text-white font-bold transition-all duration-300 lg:hidden ${
-              activeGradient === "blue" ? "text-xl" : "text-lg opacity-0"
-            }`}
+            className={`fixed pointer-events-none bottom-12 ml-4 pl-2 leading-none w-[calc(75%-30px)] bg-gradient-to-t from-teal-700 from-0% to-teal-400/0 to-100% rounded-r-sm rounded-b-none pb-1 pt-4 pr-3 z-50 flex flex-col text-white font-bold transition-all duration-300 lg:hidden ${activeGradient === "blue" ? "text-xl" : "text-lg opacity-0"
+              }`}
           >
             <div>SINGER SHAAN</div>
             <div className="text-sm">MAR 1 @ 8PM</div>
           </div>
           <div
-            className={`fixed pointer-events-none bottom-12 mr-4 leading-none w-[calc(75%-29px)] bg-gradient-to-t from-red-700 from-0% to-red-400/0 to-100% rounded-l-sm rounded-b-none pb-1 pt-4 pr-2 pl-3 z-50 flex flex-col items-end text-white font-bold transition-all duration-300 lg:hidden ${
-              activeGradient === "red" ? "text-xl" : "text-lg opacity-0"
-            }`}
+            className={`fixed pointer-events-none bottom-12 mr-4 leading-none w-[calc(75%-29px)] bg-gradient-to-t from-red-700 from-0% to-red-400/0 to-100% rounded-l-sm rounded-b-none pb-1 pt-4 pr-2 pl-3 z-50 flex flex-col items-end text-white font-bold transition-all duration-300 lg:hidden ${activeGradient === "red" ? "text-xl" : "text-lg opacity-0"
+              }`}
             style={{ right: "0px" }}
           >
             <div>MASALA COFFEE</div>
@@ -311,52 +289,9 @@ export default function App() {
           >
             {showInfo && (
               <div className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-md flex items-center justify-center p-6">
-                <div className="max-w-2xl w-full rounded-lg text-white">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold bg-gradient-to-b from-gray-100 to-gray-400 bg-clip-text text-transparent">
-                      Pronite Concert Rules
-                    </h2>
-                    <button
-                      onClick={handleInfoToggle}
-                      className="text-gray-400 hover:text-white transition-colors"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="space-y-4 text-sm text-gray-300 max-h-[70vh] overflow-y-auto pr-4">
-                    <p>⚠️ Entry Rules:</p>
-                    <ul className="list-disc list-inside space-y-2 ml-4">
-                      <li>
-                        Valid PID scan required at pronite booth for admission
-                      </li>
-                      <li>
-                        Wristband must be worn for entry to BC Alva Hockey
-                        ground
-                      </li>
-                      <li>No food or water bottles allowed inside</li>
-                      <li>All bags will be inspected at entrance</li>
-                      <li>
-                        Prohibited items (will be confiscated):
-                        <ul className="list-disc list-inside ml-6 mt-1 text-gray-400">
-                          <li>Perfumes and makeup materials</li>
-                          <li>Intoxicating substances</li>
-                          <li>Flammable materials</li>
-                          <li>Sharp objects or weapons</li>
-                          <li>Food items of any kind</li>
-                        </ul>
-                      </li>
-                      <li className="text-red-400">
-                        Entry while intoxicated is strictly prohibited - may
-                        result in expulsion and registration cancellation
-                      </li>
-                      <li>
-                        Disruptive behavior will result in immediate removal
-                      </li>
-                      <li>Security and Team Incridea present for assistance</li>
-                      <li>All instructions from officials must be followed</li>
-                    </ul>
-                  </div>
-                </div>
+                <ProniteRules
+                  handleInfoToggle={handleInfoToggle}
+                />
               </div>
             )}
             <Canvas
@@ -543,7 +478,7 @@ function Rig({ _camPosisiton }: { _camPosisiton: number[] }) {
     if (isMobile) {
       // If the cinematic sequence is still running, process the keyframes.
       if (animationState.current.running) {
-        const { currentKey, elapsed, startPos } = animationState.current;
+        const { currentKey, startPos } = animationState.current;
         const keyframe = keyframes[currentKey];
 
         // If this keyframe is a "cut", immediately set the camera's position and lookAt.

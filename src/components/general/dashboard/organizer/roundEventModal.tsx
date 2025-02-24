@@ -9,7 +9,9 @@ import { type EventByOrganizerQuery } from "~/generated/generated";
 import RoundsSidebar from "./roundsSidebar";
 
 const RoundEventModal: FC<{
-  event: EventByOrganizerQuery["eventByOrganizer"][0];
+  event: Extract<EventByOrganizerQuery["eventByOrganizer"], {
+    __typename: "QueryEventByOrganizerSuccess"
+  }>["data"][number];
 }> = ({ event }) => {
   const [isOpen, setIsOpen] = useState(false);
 

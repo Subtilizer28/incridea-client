@@ -40,6 +40,7 @@ const ViewAccommodateDetails: FC<{
         <div className="m-4 flex h-80 items-center justify-center gap-2.5 rounded-t-lg bg-white bg-opacity-20 bg-clip-padding p-1 backdrop-blur-lg backdrop-filter">
           <div className="m-4 flex flex-row items-start justify-center gap-3 text-lg">
             <div className="flex flex-col text-lg font-bold">
+              <div>PID</div>
               <div>Name</div>
               <div>Email</div>
               <div>Phone</div>
@@ -53,6 +54,9 @@ const ViewAccommodateDetails: FC<{
               "QueryAccommodationRequestsByUserIdSuccess" && (
                 <>
                   <div className="flex flex-col text-lg font-semibold">
+                    <div>
+                      {user.accommodationRequestsByUserId.data[0]?.user.id}
+                    </div>
                     <div>
                       {user.accommodationRequestsByUserId.data[0]?.user.name}
                     </div>

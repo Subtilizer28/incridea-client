@@ -12,7 +12,7 @@ import { useTrackDragInertia } from "~/hooks/use-track-drag";
 import { useWheel } from "~/hooks/use-wheel";
 import { mod } from "~/lib/math";
 
-interface NavItemProps {
+type NavItemProps = {
   active: boolean;
   label: string;
   href: string;
@@ -22,14 +22,14 @@ const links: {
   label: string;
   href: string;
 }[] = [
-  { label: "Home", href: "/" },
-  { label: "Explore", href: "/explore" },
-  { label: "Events", href: "/events" },
-  // { label: "Sponsors", href: "/sponsors" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Pronites", href: "/pronites" },
-  { label: "About", href: "/about" },
-];
+    { label: "Home", href: "/" },
+    { label: "Explore", href: "/explore" },
+    { label: "Events", href: "/events" },
+    // { label: "Sponsors", href: "/sponsors" },
+    { label: "Gallery", href: "/gallery" },
+    { label: "Pronites", href: "/pronites" },
+    { label: "About", href: "/about" },
+  ];
 
 const REPS = 4;
 const DISPLAY_LINKS_LENGTH = links.length * REPS;
@@ -187,23 +187,23 @@ const MobileNav = ({
   user,
 }: {
   user:
-    | {
-        __typename?: "User";
-        createdAt: Date;
-        email: string;
-        id: string;
-        isVerified: boolean;
-        name: string;
-        phoneNumber?: string | null;
-        role: Role;
-        profileImage?: string | null;
-        college?: {
-          __typename?: "College";
-          id: string;
-          name: string;
-        } | null;
-      }
-    | undefined;
+  | {
+    __typename?: "User";
+    createdAt: Date;
+    email: string;
+    id: string;
+    isVerified: boolean;
+    name: string;
+    phoneNumber?: string | null;
+    role: Role;
+    profileImage?: string | null;
+    college?: {
+      __typename?: "College";
+      id: string;
+      name: string;
+    } | null;
+  }
+  | undefined;
 }) => {
   const radius = 700;
   const factorX = 0.8;
@@ -369,9 +369,8 @@ const MobileNav = ({
         y,
         rotate,
         style: {
-          transform: `translateX(calc(${
-            x * factorX
-          }px)) translateY(calc(-50% + ${y * factorY}px)) rotate(${rotate}deg)`,
+          transform: `translateX(calc(${x * factorX
+            }px)) translateY(calc(-50% + ${y * factorY}px)) rotate(${rotate}deg)`,
         },
       };
     },
@@ -480,6 +479,7 @@ const MobileNav = ({
                           : "/"
                         : "/profile"
                 }
+                onClick={() => setOpen((v) => !v)}
               >
                 <div className="absolute right-8 top-8 z-10 max-w-max p-3.5">
                   {pathname === "/profile" ? (

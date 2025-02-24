@@ -14,7 +14,9 @@ function RoundsTab({
   eventId,
   eventType,
 }: {
-  rounds: EventByOrganizerQuery["eventByOrganizer"][0]["rounds"];
+  rounds: Extract<EventByOrganizerQuery["eventByOrganizer"], {
+    __typename: "QueryEventByOrganizerSuccess"
+  }>["data"][number]["rounds"];
   eventId: string;
   eventType: string;
 }) {
@@ -29,11 +31,10 @@ function RoundsTab({
               {({ selected }) => (
                 /* Use the `selected` state to conditionally style the selected tab. */
                 <button
-                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2 ${
-                    selected
+                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2 ${selected
                       ? "bg-blue-900/40 text-white"
                       : "bg-gray-600/40 text-gray-300"
-                  }`}
+                    }`}
                 >
                   Round {round.roundNo}
                 </button>
@@ -60,7 +61,7 @@ function RoundsTab({
                 </div>
                 <ScanModal eventId={eventId} eventType={eventType} />
                 {eventType === "INDIVIDUAL" ||
-                eventType === "INDIVIDUAL_MULTIPLE_ENTRY" ? (
+                  eventType === "INDIVIDUAL_MULTIPLE_ENTRY" ? (
                   <AddParticipantModal eventId={eventId} />
                 ) : (
                   <AddTeamModal eventId={eventId} />

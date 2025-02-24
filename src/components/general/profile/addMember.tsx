@@ -1,4 +1,3 @@
-import { type QueryResult } from "@apollo/client";
 import Link from "next/link";
 import { type FC, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -10,16 +9,13 @@ import Modal from "~/components/modal";
 import { CONSTANT } from "~/constants";
 import {
   type RegisterdEventsQuery,
-  type RegisterdEventsQueryVariables,
 } from "~/generated/generated";
 import { idToTeamId } from "~/utils/id";
 import { generateEventUrl } from "~/utils/url";
 
 const AddMemberModal: FC<{
   team: Extract<
-    NonNullable<
-      QueryResult<RegisterdEventsQuery, RegisterdEventsQueryVariables>["data"]
-    >["registeredEvents"],
+    RegisterdEventsQuery["registeredEvents"],
     { __typename: "QueryRegisteredEventsSuccess" }
   >["data"][number]["teams"][number];
 }> = ({ team }) => {
@@ -28,12 +24,11 @@ const AddMemberModal: FC<{
     setShowModal(false);
   };
 
-  const url = `Join my team for ${
-    team.event.name
-  } event at Incridea ${CONSTANT.YEAR}! Here's the link: ${CONSTANT.BASE_URL}${generateEventUrl(
-    team.event.name,
-    team.event.id,
-  )}?jointeam=${idToTeamId(team.id)}`;
+  const url = `Join my team for ${team.event.name
+    } event at Incridea ${CONSTANT.YEAR}! Here's the link: ${CONSTANT.BASE_URL}${generateEventUrl(
+      team.event.name,
+      team.event.id,
+    )}?jointeam=${idToTeamId(team.id)}`;
 
   const copyUrl = async () => {
     await navigator.clipboard.writeText(url);
@@ -53,9 +48,8 @@ const AddMemberModal: FC<{
         <AiOutlineUserAdd size={20} /> Add More
       </Button>
       <Modal
-        title={`There's still room for ${
-          team.event.maxTeamSize - team.members.length
-        } more crewmates!`}
+        title={`There's still room for ${team.event.maxTeamSize - team.members.length
+          } more crewmates!`}
         showModal={showModal}
         onClose={handleCloseModal}
         size={"small"}

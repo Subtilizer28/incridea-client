@@ -1,17 +1,19 @@
+import { useLazyQuery, useQuery } from "@apollo/client";
 import React, {
-  useState,
-  useEffect,
   type Dispatch,
   type SetStateAction,
+  useEffect,
+  useState,
 } from "react";
-import { useQuery, useLazyQuery } from "@apollo/client";
+import { BiLoader } from "react-icons/bi";
+
+import { type Question } from "~/pages/event/[slug]/quiz/[quizId]";
+
 import {
   AttemptQuizDocument,
   GetQuizByIdDocument,
   VerifyQuizPasswordDocument,
 } from "~/generated/generated";
-import { BiLoader } from "react-icons/bi";
-import { type Question } from "~/pages/event/[slug]/quiz/[quizId]";
 
 const IntroductionPage = ({
   setIsVerified,
@@ -21,6 +23,7 @@ const IntroductionPage = ({
   setStartTime,
   setEndTime,
   setMyTeamId,
+  setOverridePassword,
 }: {
   setIsVerified: Dispatch<SetStateAction<boolean>>;
   setQuestions: Dispatch<SetStateAction<Question[]>>;
@@ -30,6 +33,7 @@ const IntroductionPage = ({
   setEndTime: Dispatch<SetStateAction<Date>>;
   quizId: string;
   setMyTeamId: Dispatch<SetStateAction<number>>;
+  setOverridePassword: Dispatch<SetStateAction<string>>;
 }) => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,6 +48,7 @@ const IntroductionPage = ({
     endTime: Date;
     name: string;
     startTime: Date;
+    overridePassword: string;
   } | null>(null);
 
   const { loading: attemptQuizLoading, data: attemptQuizData } = useQuery(
@@ -97,6 +102,7 @@ const IntroductionPage = ({
       setStartTime(new Date(quiz.getQuizById.data.startTime));
       setEndTime(new Date(quiz.getQuizById.data.endTime));
       setName(quiz.getQuizById.data.name);
+      setOverridePassword(quiz.getQuizById.data.overridePassword);
       if (quiz.getQuizById.data.description)
         setDescription(quiz.getQuizById.data.description);
       const currentTime = new Date();
@@ -113,11 +119,10 @@ const IntroductionPage = ({
 
   if (attemptQuizLoading || quizLoading) {
     return (
-      <div className="w-full h-screen grid justify-center items-center text-3xl">
-        <p>Loading...</p>
+      <div className="grid h-screen w-full items-center justify-center text-3xl">
         <BiLoader
           size={100}
-          className="animate-spin h-6 w-6 text-primary-500"
+          className="h-6 w-6 animate-spin text-primary-500"
         />
       </div>
     );
@@ -125,7 +130,7 @@ const IntroductionPage = ({
 
   if (attemptQuizData?.attemptQuiz.__typename === "Error") {
     return (
-      <div className="w-full h-screen grid justify-center items-center text-3xl">
+      <div className="grid h-screen w-full items-center justify-center text-3xl">
         <p>{attemptQuizData.attemptQuiz.message}</p>
       </div>
     );
@@ -133,23 +138,23 @@ const IntroductionPage = ({
 
   if (quiz?.getQuizById.__typename === "Error") {
     return (
-      <div className="w-full h-screen grid justify-center items-center text-3xl">
+      <div className="grid h-screen w-full items-center justify-center text-3xl">
         <p>{quiz.getQuizById.message}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#003d1c] via-[#002e1c]] to-[#004e2c] flex flex-col justify-evenly items-center p-4">
-      <h2 className="w-fit mx-auto text-3xl lg:text-5xl font-bold bg-gradient-to-r from-orange-400 to-amber-500 via-yellow-400 text-transparent bg-clip-text drop-shadow-md">
+    <div className="via-[#002e1c]] flex min-h-screen flex-col items-center justify-evenly bg-gradient-to-br from-[#003d1c] to-[#004e2c] p-4">
+      <h2 className="mx-auto w-fit bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-500 bg-clip-text text-3xl font-bold text-transparent drop-shadow-md lg:text-5xl">
         {quizData?.name}
       </h2>
 
-      <div className="lg:w-1/2 mx-auto bg-amber-200/20 backdrop-blur-lg rounded-2xl shadow-xl border border-white/30 overflow-hidden">
+      <div className="mx-auto overflow-hidden rounded-2xl border border-white/30 bg-amber-200/20 shadow-xl backdrop-blur-lg lg:w-1/2">
         {" "}
         <div className="p-6 text-center">
-          <div className="bg-white/10 rounded-xl p-6 mt-4">
-            <h2 className="text-xl font-semibold text-amber-300 mb-4">
+          <div className="mt-4 rounded-xl bg-white/10 p-6">
+            <h2 className="mb-4 text-xl font-semibold text-amber-300">
               Password Required
             </h2>
 
@@ -158,7 +163,7 @@ const IntroductionPage = ({
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-[1rem] text-white/80 mb-2"
+                  className="mb-2 block text-[1rem] text-white/80"
                 >
                   Enter Quiz Password:
                 </label>
@@ -168,10 +173,7 @@ const IntroductionPage = ({
                   disabled={hasQuizEnded || !hasQuizStarted || !attended}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-3/4 mx-auto px-4 py-2 bg-white/20 backdrop-blur-sm text-white
-                  border border-white/30 rounded-md
-                  focus:outline-none focus:ring-2 focus:ring-amber-500
-                  placeholder-white/50"
+                  className="mx-auto w-3/4 rounded-md border border-white/30 bg-white/20 px-4 py-2 text-white placeholder-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="Enter your password"
                 />
                 {errorMessage && (
@@ -182,11 +184,11 @@ const IntroductionPage = ({
               </div>
 
               {/* Rules Section */}
-              <div className="bg-white/10 rounded-md p-4 mt-4">
-                <p className="w-fit mx-auto text-lg font-semibold text-amber-300 border-b-[1px] border-amber-400 mb-2">
+              <div className="mt-4 rounded-md bg-white/10 p-4">
+                <p className="mx-auto mb-2 w-fit border-b-[1px] border-amber-400 text-lg font-semibold text-amber-300">
                   Quiz Rules:
                 </p>
-                <p className="text-[1rem] text-pretty text-gray-100">
+                <p className="text-pretty text-[1rem] text-gray-100">
                   {quizData?.description}
                 </p>
               </div>
@@ -195,30 +197,27 @@ const IntroductionPage = ({
             {/* Action Section */}
             <div className="mt-6">
               {!attended ? (
-                <div className="text-center text-white font-medium">
+                <div className="text-center font-medium text-white">
                   You must be present at the venue to attempt the quiz
                 </div>
               ) : hasQuizEnded ? (
-                <div className="text-center text-white font-medium">
+                <div className="text-center font-medium text-white">
                   Quiz has ended
                 </div>
               ) : (
                 <>
                   {!hasQuizStarted ? (
-                    <div className="text-center text-white font-medium">
+                    <div className="text-center font-medium text-white">
                       Quiz has not yet started
                     </div>
                   ) : (
                     <button
                       onClick={handlePasswordSubmit}
                       disabled={verifyQuizLoading || !password}
-                      className="mt-6 rounded-full w-3/4 lg:w-1/2 mx-auto bg-amber-500 text-white py-2
-                hover:bg-amber-600 transition-colors duration-300
-                disabled:bg-slate-400 disabled:cursor-not-allowed
-                flex justify-center items-center"
+                      className="mx-auto mt-6 flex w-3/4 items-center justify-center rounded-full bg-amber-500 py-2 text-white transition-colors duration-300 hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-slate-400 lg:w-1/2"
                     >
                       {verifyQuizLoading ? (
-                        <BiLoader className="animate-spin h-6 w-6" />
+                        <BiLoader className="h-6 w-6 animate-spin" />
                       ) : (
                         "Submit Password"
                       )}

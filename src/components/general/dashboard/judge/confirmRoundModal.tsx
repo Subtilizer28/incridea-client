@@ -9,13 +9,14 @@ import createToast from "~/components/toast";
 import {
   CompleteRoundDocument,
   GetTotalScoresDocument,
-  type JudgeGetTeamsByRoundSubscription,
+  type JudgeGetTeamsByRoundQuery,
   type WinnersByEventQuery,
   WinnerType,
 } from "~/generated/generated";
 import { idToPid, idToTeamId } from "~/utils/id";
 
 const ConfirmRoundModal = ({
+  shouldPoll,
   roundNo,
   winners,
   winnersLoading,
@@ -24,12 +25,13 @@ const ConfirmRoundModal = ({
   selectedTeams,
   solo,
 }: {
+  shouldPoll: boolean;
   roundNo: number;
   winners: WinnersByEventQuery | undefined;
   winnersLoading: boolean;
   eventId: string;
   finalRound: boolean;
-  selectedTeams: JudgeGetTeamsByRoundSubscription;
+  selectedTeams: JudgeGetTeamsByRoundQuery;
   solo: boolean;
 }) => {
   const [showModal, setShowModal] = useState(false);
@@ -41,7 +43,7 @@ const ConfirmRoundModal = ({
   const [completeRound, { loading: completeLoading }] = useMutation(
     CompleteRoundDocument,
     {
-      refetchQueries: ["RoundByJudge"],
+      refetchQueries: ["RoundByJudge", ...(shouldPoll ? [] : ["GetRoundStatus"])],
       awaitRefetchQueries: true,
     },
   );
@@ -99,9 +101,8 @@ const ConfirmRoundModal = ({
         Confirm {finalRound ? "Winners" : solo ? "Participants" : "Teams"}
       </Button>
       <Modal
-        title={`Confirm ${
-          finalRound ? "Winners" : solo ? "Participants" : "Teams"
-        }`}
+        title={`Confirm ${finalRound ? "Winners" : solo ? "Participants" : "Teams"
+          }`}
         showModal={showModal}
         onClose={handleCloseModal}
         size="medium"
@@ -117,32 +118,28 @@ const ConfirmRoundModal = ({
           {!finalRound && (
             <div className="mb-2 mt-2 hidden w-full flex-row justify-evenly rounded-lg bg-gray-600 p-2 md:flex">
               <span
-                className={`text-lg font-bold ${
-                  solo ? "basis-1/3" : "basis-1/4"
-                } text-center`}
+                className={`text-lg font-bold ${solo ? "basis-1/3" : "basis-1/4"
+                  } text-center`}
               >
                 Sl. No.
               </span>
               <span
-                className={`text-lg font-bold ${
-                  solo ? "basis-1/3" : "basis-1/4"
-                } text-center`}
+                className={`text-lg font-bold ${solo ? "basis-1/3" : "basis-1/4"
+                  } text-center`}
               >
                 {solo ? "PID" : "Team ID"}
               </span>
               {!solo && (
                 <span
-                  className={`text-lg font-bold ${
-                    solo ? "basis-1/3" : "basis-1/4"
-                  } text-center`}
+                  className={`text-lg font-bold ${solo ? "basis-1/3" : "basis-1/4"
+                    } text-center`}
                 >
                   Team Name
                 </span>
               )}
               <span
-                className={`text-lg font-bold ${
-                  solo ? "basis-1/3" : "basis-1/4"
-                } text-center`}
+                className={`text-lg font-bold ${solo ? "basis-1/3" : "basis-1/4"
+                  } text-center`}
               >
                 Total Score
               </span>
@@ -152,7 +149,7 @@ const ConfirmRoundModal = ({
           {/* Non final round - Confirming participant selection for next round */}
           {!finalRound &&
             selectedTeams.judgeGetTeamsByRound.__typename ===
-              "SubscriptionJudgeGetTeamsByRoundSuccess" &&
+            "QueryJudgeGetTeamsByRoundSuccess" &&
             selectedTeams.judgeGetTeamsByRound.data.filter(
               (team) => team.roundNo > roundNo,
             ).length === 0 && (
@@ -163,7 +160,7 @@ const ConfirmRoundModal = ({
 
           {!finalRound &&
             selectedTeams.judgeGetTeamsByRound.__typename ===
-              "SubscriptionJudgeGetTeamsByRoundSuccess" && (
+            "QueryJudgeGetTeamsByRoundSuccess" && (
               <div className="my-4 flex w-full flex-wrap gap-2">
                 {selectedTeams.judgeGetTeamsByRound.data
                   .filter((team) => team.roundNo > roundNo)
@@ -174,27 +171,24 @@ const ConfirmRoundModal = ({
                         key={team.id}
                       >
                         <div
-                          className={`${
-                            solo ? "basis-1/3" : "basis-1/4"
-                          } text-lg text-white/60`}
+                          className={`${solo ? "basis-1/3" : "basis-1/4"
+                            } text-lg text-white/60`}
                         >
                           <Badge className="text-xs">{index + 1}</Badge>
                         </div>
 
                         {!solo && (
                           <h1
-                            className={`${
-                              solo ? "basis-1/3" : "basis-1/4"
-                            } text-lg text-white/60`}
+                            className={`${solo ? "basis-1/3" : "basis-1/4"
+                              } text-lg text-white/60`}
                           >
                             {team.name}
                           </h1>
                         )}
 
                         <p
-                          className={`${
-                            solo ? "basis-1/3" : "basis-1/4"
-                          } text-lg text-white/60`}
+                          className={`${solo ? "basis-1/3" : "basis-1/4"
+                            } text-lg text-white/60`}
                         >
                           {solo
                             ? idToPid(team.leaderId?.toString() ?? "")
@@ -202,9 +196,8 @@ const ConfirmRoundModal = ({
                         </p>
 
                         <p
-                          className={`${
-                            solo ? "basis-1/3" : "basis-1/4"
-                          } text-lg text-white/60`}
+                          className={`${solo ? "basis-1/3" : "basis-1/4"
+                            } text-lg text-white/60`}
                         >
                           {scoresLoading && <Spinner intent={"white"} />}
                           {scores?.getTotalScores.__typename ===
@@ -221,7 +214,7 @@ const ConfirmRoundModal = ({
 
           {!finalRound &&
             selectedTeams.judgeGetTeamsByRound.__typename ===
-              "SubscriptionJudgeGetTeamsByRoundSuccess" &&
+            "QueryJudgeGetTeamsByRoundSuccess" &&
             selectedTeams.judgeGetTeamsByRound.data.filter(
               (team) => team.roundNo > roundNo,
             ).length !== 0 && (
@@ -292,7 +285,7 @@ const ConfirmRoundModal = ({
 
           {finalRound &&
             winners?.winnersByEvent.__typename ===
-              "QueryWinnersByEventSuccess" && (
+            "QueryWinnersByEventSuccess" && (
               <Button
                 onClick={handleComplete}
                 disabled={completeLoading}

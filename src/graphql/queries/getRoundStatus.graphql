@@ -1,10 +1,10 @@
-subscription GetRoundStatus($eventId: ID!, $roundNo: Int!) {
+query GetRoundStatus($eventId: ID!, $roundNo: Int!) {
   getRoundStatus(eventId: $eventId, roundNo: $roundNo) {
     ... on Error {
       __typename
       message
     }
-    ... on SubscriptionGetRoundStatusSuccess {
+    ... on QueryGetRoundStatusSuccess {
       __typename
       data {
         selectStatus

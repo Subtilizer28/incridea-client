@@ -14,13 +14,14 @@ import {
 import Button from "~/components/button";
 import EventDetails from "~/components/general/event/eventDetails";
 import Modal from "~/components/modal";
-import { env } from "~/env";
 import { type EventByOrganizerQuery } from "~/generated/generated";
 
 export default function ViewEventModal({
   event,
 }: {
-  event: EventByOrganizerQuery["eventByOrganizer"][0];
+  event: Extract<EventByOrganizerQuery["eventByOrganizer"], {
+    __typename: "QueryEventByOrganizerSuccess"
+  }>["data"][number];
 }) {
   const [showModal, setShowModal] = useState(false);
 
@@ -56,7 +57,7 @@ export default function ViewEventModal({
       },
       {
         name: "Fees",
-        text: event?.id==="50" ? 60 : event?.id ==="52" ? 500: event?.id==="53" ? 250 : event?.id==="54" ? 200 : event?.id==="55" ? 150 : event?.id==="56" ? 300 : event?.fees,
+        text: event?.id === "50" ? 60 : event?.id === "52" ? 500 : event?.id === "53" ? 250 : event?.id === "54" ? 200 : event?.id === "55" ? 150 : event?.id === "56" ? 300 : event?.fees,
         Icon: IoCashOutline,
       },
       {

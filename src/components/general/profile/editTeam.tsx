@@ -10,16 +10,12 @@ import DeleteTeamMember from "./deleteMember";
 import DeleteTeamModal from "./deleteTeam";
 import {
   type RegisterdEventsQuery,
-  type RegisterdEventsQueryVariables,
 } from "~/generated/generated";
-import { type QueryResult } from "@apollo/client";
 import { FiEdit } from "react-icons/fi";
 
 const EditTeamModal: FC<{
   team: Extract<
-    NonNullable<
-      QueryResult<RegisterdEventsQuery, RegisterdEventsQueryVariables>["data"]
-    >["registeredEvents"],
+    RegisterdEventsQuery["registeredEvents"],
     { __typename: "QueryRegisteredEventsSuccess" }
   >["data"][number]["teams"][number];
   userId: string;
@@ -72,12 +68,12 @@ const EditTeamModal: FC<{
                 <Badge
                   // className="text-white bg-primary-800 border-secondary-600"
                   className={`${member.user.id == team.leaderId?.toString() ? "bg-primary-800" : "bg-primary-700"} text-white border-secondary-700`}
-                  // className={`${member.user.id == team.leaderId?.toString() ? " bg-secondary-500" : "bg-info"} border text-black border-secondary-200/80`}
-                  // color={
-                  //   member.user.id == team.leaderId?.toString()
-                  //     ? "success"
-                  //     : "info"
-                  // }
+                // className={`${member.user.id == team.leaderId?.toString() ? " bg-secondary-500" : "bg-info"} border text-black border-secondary-200/80`}
+                // color={
+                //   member.user.id == team.leaderId?.toString()
+                //     ? "success"
+                //     : "info"
+                // }
                 >
                   {member.user.id == team.leaderId?.toString()
                     ? "Leader"

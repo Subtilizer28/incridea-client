@@ -1,48 +1,58 @@
 import { useMutation } from "@apollo/client";
 import { Tab } from "@headlessui/react";
-import { type FC, useState } from "react";
+import { EyeIcon } from "lucide-react";
+import Link from "next/link";
+import { QRCodeSVG } from "qrcode.react";
+import { type FC, useEffect, useState } from "react";
 import { BiLoaderAlt, BiTrash } from "react-icons/bi";
 import { BsQrCodeScan } from "react-icons/bs";
-import { QRCodeSVG } from "qrcode.react";
 import { IoCopy } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "~/components/ui/hover-card";
+
 import Button from "~/components/button";
 import createToast from "~/components/toast";
+import { env } from "~/env";
 import {
-  UpdateQuizStatusDocument,
   DeleteCriteriaDocument,
   DeleteJudgeDocument,
   DeleteRoundDocument,
-  NotifyParticipantsDocument,
+  EndQuizDocument,
   type EventByOrganizerQuery,
+  NotifyParticipantsDocument,
+  UpdateQuizStatusDocument,
 } from "~/generated/generated";
 
 import CreateCriteriaModal from "./createCriteriaModal";
 import CreateJudgeModal from "./createJudgeModal";
 import CreateQuizModal from "./createQuizModal";
-import RoundAddModal from "./roundsAddModal";
-import Link from "next/link";
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "~/components/ui/hover-card";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogHeader,
-  DialogContent,
-} from "~/components/ui/dialog";
-import { EyeIcon } from "lucide-react";
 import EndQuizModal from "./endQuizModal";
-import { env } from "~/env";
+import RoundAddModal from "./roundsAddModal";
 
 const RoundsSidebar: FC<{
-  rounds: EventByOrganizerQuery["eventByOrganizer"][0]["rounds"];
+  rounds: Extract<EventByOrganizerQuery["eventByOrganizer"],
+    { __typename: "QueryEventByOrganizerSuccess" }>["data"][number]["rounds"];
   eventId: string;
   isPublished: boolean;
 }> = ({ rounds, eventId, isPublished }) => {
+  const [endQuizMutation] = useMutation(
+    EndQuizDocument,
+    {
+      refetchQueries: ["EventByOrganizer"],
+      awaitRefetchQueries: true,
+    },
+  );
   const [deleteRound, { loading: loading2 }] = useMutation(
     DeleteRoundDocument,
     {
@@ -150,6 +160,28 @@ const RoundsSidebar: FC<{
     }
   };
 
+  useEffect(() => {
+    rounds.map((round) => {
+      if (round.quiz?.endTime && new Date(round.quiz.endTime) < new Date()) {
+        if (!round.quiz.completed) {
+          endQuizMutation({
+            variables: {
+              quizId: round.quiz.id,
+            },
+          })
+            .then((res) => {
+              if (res.data?.endQuiz.__typename === "MutationEndQuizSuccess") {
+                console.log("Quiz Ended");
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      }
+    });
+  }, [rounds]);
+
   const handlePublishQuiz = async (quizId: string, allowAttempts: boolean) => {
     const promise = updateQuizStatus({
       variables: {
@@ -198,11 +230,10 @@ const RoundsSidebar: FC<{
                   onClick={() => {
                     setSelectedRound(round.roundNo);
                   }}
-                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2 ${
-                    selected
-                      ? "bg-blue-900/40 text-white"
-                      : "bg-gray-600/40 text-gray-300"
-                  }`}
+                  className={`w-full whitespace-nowrap rounded-lg px-3 py-2 ${selected
+                    ? "bg-blue-900/40 text-white"
+                    : "bg-gray-600/40 text-gray-300"
+                    }`}
                 >
                   Round {round.roundNo}
                 </button>
@@ -235,7 +266,7 @@ const RoundsSidebar: FC<{
           </div>
         </Tab.List>
 
-        <Tab.List className="flex flex-col lg:flex-row mt-2">
+        <Tab.List className="mt-2 flex flex-col lg:flex-row">
           <div className="mx-2 mb-2 w-full rounded-lg bg-gray-700 p-3 lg:mb-0">
             <h1 className="text-xl font-bold">Judges</h1>
             {/* List of judges for this round */}
@@ -329,8 +360,8 @@ const RoundsSidebar: FC<{
           </div>
 
           {rounds.length !== selectedRound && (
-            <div className="mx-2 w-full rounded-lg bg-gray-700 p-3 relative">
-              <h1 className="text-xl font-bold flex items-center justify-between mx-1">
+            <div className="relative mx-2 w-full rounded-lg bg-gray-700 p-3">
+              <h1 className="mx-1 flex items-center justify-between text-xl font-bold">
                 Quiz
               </h1>
               {rounds.map((round) => (
@@ -341,7 +372,7 @@ const RoundsSidebar: FC<{
                         <div className="mt-2">
                           {!round.quiz.completed &&
                             (!round.quiz.allowAttempts ? (
-                              <div className="flex items-center mr-1 justify-between">
+                              <div className="mr-1 flex items-center justify-between">
                                 <Button
                                   intent={"dark"}
                                   className="w-auto rounded-md"
@@ -371,13 +402,13 @@ const RoundsSidebar: FC<{
                                 </DialogTrigger>
                                 <DialogContent className="w-[20%]">
                                   <DialogHeader>
-                                    <h1 className="text-3xl text-center font-bold">
+                                    <h1 className="text-center text-3xl font-bold">
                                       {round.quiz.name}
                                     </h1>
                                   </DialogHeader>
-                                  <div className="flex flex-col justify-center items-center space-y-4">
+                                  <div className="flex flex-col items-center justify-center space-y-4">
                                     <QRCodeSVG
-                                      value={`${env.NEXTAUTH_URL}/event/${round.quiz.name}-${selectedRound}/quiz/${round.quiz.id}`}
+                                      value={`${env.NEXT_PUBLIC_THIS_APP_URL}/event/${round.quiz.name}-${selectedRound}/quiz/${round.quiz.id}`}
                                       size={200}
                                     />
                                     <div className="flex">
@@ -386,7 +417,7 @@ const RoundsSidebar: FC<{
                                         className="rounded-md bg-black"
                                         onClick={() =>
                                           handleCopyURL(
-                                            `${env.NEXTAUTH_URL}/event/${round.quiz?.name}-${selectedRound}/quiz/${round.quiz?.id}`,
+                                            `${env.NEXT_PUBLIC_THIS_APP_URL}/event/${round.quiz?.name}-${selectedRound}/quiz/${round.quiz?.id}`,
                                           )
                                         }
                                       >
@@ -407,7 +438,7 @@ const RoundsSidebar: FC<{
                                       ? "danger"
                                       : "success"
                                   }
-                                  className="w-auto mt-2 rounded-md"
+                                  className="mt-2 w-auto rounded-md"
                                   onClick={() =>
                                     handlePublishQuiz(
                                       round.quiz?.id ?? "",
@@ -422,9 +453,9 @@ const RoundsSidebar: FC<{
                                   Quiz
                                 </Button>
                               </HoverCardTrigger>
-                              <HoverCardContent className="z-10 lg:bottom-0 bottom-10 lg:right-20 sm:-right-10 -right-20 absolute">
-                                <div className="sm:text-lg text-sm">
-                                  <p className="text-center font-semibold sm:text-xl text-lg">
+                              <HoverCardContent className="absolute -right-20 bottom-10 z-10 sm:-right-10 lg:bottom-0 lg:right-20">
+                                <div className="text-sm sm:text-lg">
+                                  <p className="text-center text-lg font-semibold sm:text-xl">
                                     {round.quiz.name}
                                   </p>
                                   <p>{round.quiz.description}</p>
@@ -478,7 +509,7 @@ const RoundsSidebar: FC<{
                           {round.quiz.completed && (
                             <Button
                               intent={"dark"}
-                              className="w-auto rounded-md mt-2"
+                              className="mt-2 w-auto rounded-md"
                             >
                               <Link
                                 // TODO(Omkar): Wont this link break
@@ -515,6 +546,7 @@ const RoundsSidebar: FC<{
                               endTime: new Date(round.quiz.endTime),
                               points: round.quiz.points,
                               qualifyNext: round.quiz.qualifyNext,
+                              overridePassword: round.quiz.overridePassword,
                             }
                           }
                         />

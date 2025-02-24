@@ -37,6 +37,38 @@ const authenticateUser = async (req: NextApiRequest, res: NextApiResponse) => {
 const f = createUploadthing();
 
 export const uploadRouter = {
+  accommodation: f({
+    image: {
+      maxFileCount: 1,
+      maxFileSize: "4MB",
+    },
+  })
+    .middleware(async ({ req, res, files }) => {
+      const user = await authenticateUser(req, res);
+      if (!user)
+        throw new UploadThingError({
+          message: "Unauthorized",
+          code: "FORBIDDEN",
+        });
+      const customId = req.headers.custom_id as string | undefined;
+      return {
+        [UTFiles]: files.map((file) => ({
+          ...file,
+          ...(customId ? {
+            customId: customId.replace(/[\s\\/]/g, "_"),
+          } : {
+            customId: file.name + "_" + file.lastModified
+          })
+        })),
+      };
+    })
+    .onUploadError((error) => {
+      console.error("Error uploading accommodation image: ", error);
+    })
+    .onUploadComplete((data) => {
+      console.log("Accomodation Image: ", data.file.url);
+    }),
+
   asset: f({
     image: {
       maxFileCount: 50,
@@ -71,10 +103,10 @@ export const uploadRouter = {
       };
     })
     .onUploadError((error) => {
-      console.error("Error uploading asset: ", error);
+      console.error("Error uploading gallery image: ", error);
     })
     .onUploadComplete((data) => {
-      console.log("Gallery Image: ", data.file.url);
+      console.log("Gallery image: ", data.file.url);
     }),
 
   event: f({
@@ -103,10 +135,10 @@ export const uploadRouter = {
       };
     })
     .onUploadError((error) => {
-      console.error("Error uploading asset: ", error);
+      console.error("Error uploading event image: ", error);
     })
     .onUploadComplete((data) => {
-      console.log("Event Image: ", data.file.url);
+      console.log("Event image: ", data.file.key);
     }),
 
   quiz: f({
@@ -135,21 +167,21 @@ export const uploadRouter = {
       };
     })
     .onUploadError((error) => {
-      console.error("Error uploading asset: ", error);
+      console.error("Error uploading question image: ", error);
     })
     .onUploadComplete((data) => {
-      console.log("Question Image: ", data.file.url);
+      console.log("Question image: ", data.file.key);
     }),
 
-  accommodation: f({
+  team: f({
     image: {
-      maxFileCount: 1,
-      maxFileSize: "4MB",
+      maxFileCount: 50,
+      maxFileSize: "512KB",
     },
   })
     .middleware(async ({ req, res, files }) => {
       const user = await authenticateUser(req, res);
-      if (!user)
+      if (!user || user.role !== Role.Admin)
         throw new UploadThingError({
           message: "Unauthorized",
           code: "FORBIDDEN",
@@ -167,10 +199,10 @@ export const uploadRouter = {
       };
     })
     .onUploadError((error) => {
-      console.error("Error uploading asset: ", error);
+      console.error("Error uploading team image: ", error);
     })
     .onUploadComplete((data) => {
-      console.log("Accomodation Image: ", data.file.url);
+      console.log("Team image: ", data.file.key);
     }),
 } satisfies FileRouter;
 

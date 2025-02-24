@@ -1,4 +1,3 @@
-import { TEAM_MEMBERS } from "~/constants/team";
 import { ASSETS } from "~/constants/assets";
 
 const CONSTANT = {
@@ -20,12 +19,13 @@ const CONSTANT = {
     },
   },
   DATE: {
+    // FIXME: 0-index dates vs 1-index dates
     ROUND: {
-      DEAFULT_START: new Date(2025, 2, 27, 9, 30),
+      DEAFULT_START: new Date(2025, 1, 27, 9, 30),
     },
     ACCOMODATION: {
-      CHECK_IN_TIME: new Date(2025, 2, 27, 9, 30),
-      CHECK_OUT_TIME: new Date(2025, 3, 1, 22, 30),
+      CHECK_IN_TIME: new Date(2025, 1, 27, 9, 30),
+      CHECK_OUT_TIME: new Date(2025, 2, 1, 22, 30),
     },
     INCRIDEA: {
       DAY1: new Date("2025-02-27T09:00:00"),
@@ -37,10 +37,9 @@ const CONSTANT = {
     PRONITE_USER: 669 as const,
     // TODO(Omkar): Update following, reflects in the leaderboard
     TECH_TEAM: [1, 2, 5, 7, 9, 17, 18, 28, 36, 37, 39, 120, 125, 126, 127, 131, 498, 897, 1095],
-    ACCOMMODATION_TEAM: [96]
+    ACCOMMODATION_TEAM: [96, 768, 1652]
   },
   ASSETS: ASSETS,
-  TEAM_MEMBERS: TEAM_MEMBERS,
 };
 
 export { CONSTANT };

@@ -2,19 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ExternalLink } from "lucide-react";
 import { CONSTANT } from "~/constants";
-import { type GetSponsorsQuery, type GetSponsorsQueryVariables } from "~/generated/generated";
-import { type QueryResult } from "@apollo/client";
+import { type GetSponsorsQuery } from "~/generated/generated";
 
 const SponsorGearCarousel = ({
   sponsors,
   isSoundEnabled,
   setIsSoundEnabled,
 }: {
-  sponsors: Extract<
-    NonNullable<
-      QueryResult<GetSponsorsQuery, GetSponsorsQueryVariables>["data"]>["getSponsors"], {
-        __typename: "QueryGetSponsorsSuccess";
-      }>["data"];
+  sponsors: Extract<GetSponsorsQuery["getSponsors"], {
+    __typename: "QueryGetSponsorsSuccess";
+  }>["data"];
   isSoundEnabled: boolean;
   setIsSoundEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {

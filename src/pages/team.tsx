@@ -1,7 +1,50 @@
-import TeamCard from "~/components/general/about/teamCard";
-import { CONSTANT } from "~/constants";
+import { type GetStaticProps } from "next";
+import TechTeamCard from "~/components/general/about/techTeamCard";
+import { GetTechTeamMembersDocument, type GetTechTeamMembersQuery } from "~/generated/generated";
+import { client } from "~/lib/apollo";
 
-const Page = () => {
+type Props = | {
+  techTeamMembers: Extract<
+    GetTechTeamMembersQuery["getTechTeamMembers"],
+    {
+      __typename: "QueryGetTechTeamMembersSuccess";
+    }
+  >["data"];
+  error?: never;
+}
+  | {
+    techTeamMembers?: never;
+    error: string;
+  };
+
+const getStaticProps: GetStaticProps<Props> = async () => {
+  try {
+    const { data: techTeamMembers } = await client.query({
+      query: GetTechTeamMembersDocument,
+      fetchPolicy: "no-cache"
+    })
+
+    if (techTeamMembers.getTechTeamMembers.__typename === "Error")
+      throw new Error(techTeamMembers.getTechTeamMembers.message);
+
+    return {
+      props: {
+        techTeamMembers: techTeamMembers.getTechTeamMembers.data,
+      },
+      revalidate: 60
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      props: {
+        error: error instanceof Error ? error.message : "Could not fetch techTeamMembers",
+      },
+      revalidate: 60,
+    };
+  }
+}
+
+const Page = ({ techTeamMembers }: Props) => {
   return (
     <div className="flex min-h-screen flex-col gap-y-8 bg-transparent pb-10 pt-32">
       <div className="px-4">
@@ -15,16 +58,10 @@ const Page = () => {
         </p>
       </div>
       <div className="mx-auto flex max-w-[80rem] flex-wrap justify-center gap-10 px-2">
-        {Object.entries(CONSTANT.TEAM_MEMBERS).map(([name, details], idx) => (
-          <TeamCard
+        {techTeamMembers?.map((techTeamMember, idx) => (
+          <TechTeamCard
             key={idx}
-            name={name}
-            role={details.role}
-            image={details.image}
-            linkedin={details.linkedin}
-            instagram={details.instagram}
-            github={details.github}
-            quote={details.quote}
+            techTeamMember={techTeamMember}
           />
         ))}
       </div>
@@ -33,3 +70,5 @@ const Page = () => {
 };
 
 export default Page;
+
+export { getStaticProps };

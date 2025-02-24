@@ -1,39 +1,36 @@
 import Image from "next/image";
 import { AiFillGithub, AiFillInstagram } from "react-icons/ai";
 import { RiLinkedinFill } from "react-icons/ri";
+import { type GetTechTeamMembersQuery } from "~/generated/generated";
 
 
-const TeamCard = ({ name, role, linkedin, github, quote, instagram, image }: {
-  name: string;
-  role: string;
-  image: string;
-  linkedin: string;
-  instagram: string;
-  github: string;
-  quote: string;
+const TechTeamCard = ({ techTeamMember }: {
+  techTeamMember: Extract<GetTechTeamMembersQuery["getTechTeamMembers"], {
+    __typename: "QueryGetTechTeamMembersSuccess";
+  }>["data"][number];
 }) => {
   return (
     <div className="flex w-[20rem] gap-4 rounded-xl border border-primary-200/80 bg-primary-500 bg-opacity-20 bg-clip-padding px-5 pt-5 duration-200 hover:scale-[1.02]">
       <div className="flex h-full w-full flex-col gap-4">
         <Image
-          src={image}
-          alt={name}
+          src={techTeamMember.imageUrl ?? ""}
+          alt={techTeamMember.name}
           height={300}
           width={300}
           className="top-0 aspect-square w-[18rem] rounded-xl object-cover"
         />
         <div>
           <h3 className="text-center font-life-craft text-4xl tracking-wide text-white">
-            {name}
+            {techTeamMember.name}
           </h3>
           <h1 className="text-center text-xl font-semibold text-white">
-            {role}
+            {techTeamMember.role}
           </h1>
         </div>
 
         <div className="flex w-full justify-evenly">
           <a
-            href={github}
+            href={techTeamMember.github ?? "#"}
             target="_blank"
             rel="noreferrer"
             className="rounded-full border border-[#2b6f3d] bg-primary-500 bg-opacity-20 bg-clip-padding p-2 duration-300 hover:scale-105"
@@ -41,7 +38,7 @@ const TeamCard = ({ name, role, linkedin, github, quote, instagram, image }: {
             <AiFillGithub className="text-white" size={20} />
           </a>
           <a
-            href={instagram}
+            href={techTeamMember.instagram ?? "#"}
             target="_blank"
             rel="noreferrer"
             className="rounded-full border border-[#2b6f3d] bg-primary-500 bg-opacity-20 bg-clip-padding p-2 duration-300 hover:scale-105"
@@ -49,7 +46,7 @@ const TeamCard = ({ name, role, linkedin, github, quote, instagram, image }: {
             <AiFillInstagram className="text-white" size={20} />
           </a>
           <a
-            href={linkedin}
+            href={techTeamMember.linkedin ?? "#"}
             target="_blank"
             rel="noreferrer"
             className="rounded-full border border-[#2b6f3d] bg-primary-500 bg-opacity-20 bg-clip-padding p-2 duration-300 hover:scale-105"
@@ -71,7 +68,7 @@ const TeamCard = ({ name, role, linkedin, github, quote, instagram, image }: {
               fill="currentColor"
             />
           </svg>
-          <div className="text-center font-bold italic text-white">{quote}</div>
+          <div className="text-center font-bold italic text-white">{techTeamMember.quote}</div>
 
           <div className="flex justify-end">
             <svg
@@ -93,4 +90,4 @@ const TeamCard = ({ name, role, linkedin, github, quote, instagram, image }: {
   );
 };
 
-export default TeamCard;
+export default TechTeamCard;

@@ -1,13 +1,14 @@
 import { useMutation } from "@apollo/client";
-import { type FC, useState } from "react";
-import Button from "~/components/button";
-import { TextInput, NumberInput } from "~/components/input";
-import { DateTimePicker } from "~/components/datetime-picker";
 import { PencilIcon } from "lucide-react";
+import { type FC, useState } from "react";
+import toast from "react-hot-toast";
+
+import Button from "~/components/button";
+import { DateTimePicker } from "~/components/datetime-picker";
+import { NumberInput, TextInput } from "~/components/input";
 import Modal from "~/components/modal";
 import Spinner from "~/components/spinner";
 import createToast from "~/components/toast";
-import toast from "react-hot-toast";
 import { CreateQuizDocument } from "~/generated/generated";
 
 const CreateQuizModal: FC<{
@@ -20,6 +21,7 @@ const CreateQuizModal: FC<{
     startTime: Date;
     endTime: Date;
     password: string;
+    overridePassword: string;
     points: number;
     qualifyNext: number;
   } | null;
@@ -39,6 +41,7 @@ const CreateQuizModal: FC<{
     password: quizDetails?.password ?? "",
     points: quizDetails?.points ?? 1,
     qualifyNext: quizDetails?.qualifyNext ?? 5,
+    overridePassword: quizDetails?.overridePassword ?? "",
   });
   const [createQuiz, { loading }] = useMutation(CreateQuizDocument, {
     refetchQueries: ["EventByOrganizer"],
@@ -97,6 +100,7 @@ const CreateQuizModal: FC<{
         startTime: formatDate(quizInfo.startTime),
         roundId: String(roundNo),
         password: quizInfo.password,
+        overridePassword: quizInfo.overridePassword,
         points: quizInfo.points,
         qualifyNext: quizInfo.qualifyNext,
       },
@@ -154,7 +158,7 @@ const CreateQuizModal: FC<{
       >
         <div
           className={`p-5 ${
-            loading && "pointer-events-none cursor-not-allowed opacity-50 z-30"
+            loading && "pointer-events-none z-30 cursor-not-allowed opacity-50"
           }`}
         >
           <form className="flex flex-col gap-5" onSubmit={handleCreateQuiz}>
@@ -183,6 +187,16 @@ const CreateQuizModal: FC<{
                 disabled={loading}
                 onChange={handleChange}
               />
+              <label htmlFor="password">
+                Quiz Malpractice Override Password (Not to be disclosed)
+              </label>
+              <TextInput
+                name="overridePassword"
+                placeholder="Enter override password"
+                value={quizInfo.overridePassword}
+                disabled={loading}
+                onChange={handleChange}
+              />
               {quizDetails && (
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="points">
@@ -208,7 +222,7 @@ const CreateQuizModal: FC<{
                 </div>
               )}
               {
-                <div className="sm:grid grid-cols-2 gap-2">
+                <div className="grid-cols-2 gap-2 sm:grid">
                   <div className="flex flex-col gap-2 sm:w-3/5">
                     <label htmlFor="startTime">Start Time</label>
                     <DateTimePicker

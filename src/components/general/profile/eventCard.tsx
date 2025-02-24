@@ -13,23 +13,14 @@ import EditTeamModal from "./editTeam";
 import {
   EventType,
   type RegisterdEventsQuery,
-  type RegisterdEventsQueryVariables,
 } from "~/generated/generated";
-import { type QueryResult } from "@apollo/client";
-import { env } from "~/env";
 import { CONSTANT } from "~/constants";
 
 const EventCard: FC<{
-  teams: Extract<
-    NonNullable<
-      QueryResult<RegisterdEventsQuery, RegisterdEventsQueryVariables>["data"]
-    >["registeredEvents"],
+  teams: Extract<RegisterdEventsQuery["registeredEvents"],
     { __typename: "QueryRegisteredEventsSuccess" }
   >["data"][number]["teams"];
-  event: Extract<
-    NonNullable<
-      QueryResult<RegisterdEventsQuery, RegisterdEventsQueryVariables>["data"]
-    >["registeredEvents"],
+  event: Extract<RegisterdEventsQuery["registeredEvents"],
     { __typename: "QueryRegisteredEventsSuccess" }
   >["data"][number];
   userId: string;

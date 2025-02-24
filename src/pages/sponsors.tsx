@@ -3,15 +3,12 @@ import SponsorGearCarousel from "~/components/sponsorsCard";
 import { ArrowDown, MousePointerClick, Volume2, VolumeX } from "lucide-react";
 import { type GetStaticProps } from "next";
 import { client } from "~/lib/apollo";
-import { GetSponsorsDocument, type GetSponsorsQuery, type GetSponsorsQueryVariables } from "~/generated/generated";
-import { type QueryResult } from "@apollo/client";
+import { GetSponsorsDocument, type GetSponsorsQuery } from "~/generated/generated";
 import Link from "next/link";
 
 type Props = | {
   sponsors: Extract<
-    NonNullable<
-      QueryResult<GetSponsorsQuery, GetSponsorsQueryVariables>["data"]
-    >["getSponsors"],
+    GetSponsorsQuery["getSponsors"],
     {
       __typename: "QueryGetSponsorsSuccess";
     }

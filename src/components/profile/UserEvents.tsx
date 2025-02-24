@@ -55,7 +55,7 @@ const UserEvents: FC<{
         {events?.registeredEvents.__typename ===
           "QueryRegisteredEventsSuccess" &&
           events.registeredEvents.data.length === 0 ? (
-          <div className="w-full h-full text-3xl text-white justify-center flex flex-col gap-6 items-center px-8">
+          <div className="w-full h-full md:text-3xl text-xl my-8 text-white justify-center flex flex-col gap-6 items-center px-8">
             <p className="text-center">
               Register yourself in events to see your Quests
             </p>

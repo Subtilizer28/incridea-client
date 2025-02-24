@@ -1,4 +1,4 @@
-import { type QueryResult, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { Tab } from "@headlessui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -11,10 +11,8 @@ import Spinner from "~/components/spinner";
 import {
   EventByIdDocument,
   type EventByIdQuery,
-  type EventByIdQueryVariables,
   GetScoreSheetJuryDocument,
   type GetScoreSheetJuryQuery,
-  type GetScoreSheetJuryQueryVariables,
   Role,
 } from "~/generated/generated";
 import { useAuth } from "~/hooks/useAuth";
@@ -62,7 +60,7 @@ const RoundTabs = ({
   rounds,
   eventId,
 }: {
-  rounds: Extract<NonNullable<QueryResult<EventByIdQuery, EventByIdQueryVariables>["data"]>["eventById"], {
+  rounds: Extract<EventByIdQuery["eventById"], {
     __typename: "QueryEventByIdSuccess";
   }>["data"]["rounds"];
   eventId: string;
@@ -157,10 +155,7 @@ const RoundTable = ({
   );
 };
 
-type QuerySuccess = Extract<
-  NonNullable<
-    QueryResult<GetScoreSheetJuryQuery, GetScoreSheetJuryQueryVariables>["data"]
-  >["getScoreSheetJuryView"],
+type QuerySuccess = Extract<GetScoreSheetJuryQuery["getScoreSheetJuryView"],
   { __typename: "QueryGetScoreSheetJuryViewSuccess" }
 >;
 

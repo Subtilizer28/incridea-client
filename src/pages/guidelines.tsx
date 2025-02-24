@@ -1,7 +1,6 @@
-import { type NextPage } from "next";
 import { CONSTANT } from "~/constants";
 
-const Guidelines: NextPage = () => {
+const Page = () => {
   return (
     <div className="overflow-y-auto overflow-x-hidden text-gray-100 p-10 pt-32">
       <div className="mx-auto w-full max-w-7xl">
@@ -23,16 +22,19 @@ const Guidelines: NextPage = () => {
           <ul className="mt-2 list-disc pl-4">
             <li>
               Registration for the fest can only be done through the official
-              website of Incridea ({CONSTANT.BASE_URL}).
+              website of Incridea <a className="underline hover:text-blue-500" href={CONSTANT.BASE_URL} target="_blank">({CONSTANT.BASE_URL})</a>.
             </li>
             <li>
               There are two different categories of participants, who will have
               access to all the events and pronites.
             </li>
-            <li>Students of NMAM Institute of Technology, Nitte - ₹ 350</li>
+            <li>Students of NMAM Institute of Technology, Nitte - ₹ {CONSTANT.REG_AMOUNT_IN_INR.INTERNAL}</li>
             <li>
               Students of external engineering colleges and Nitte sister
-              institutions - ₹ 450
+              institutions - ₹ {CONSTANT.REG_AMOUNT_IN_INR.EXTERNAL}
+            </li>
+            <li>
+              Only students from engineering institutions and Nitte sister institutes are eligible to register. Registrations from non-engineering colleges or fraudulent entries will be disqualified without refund.
             </li>
             <li>
               Event registrations can be done either through website or on-spot,
@@ -236,4 +238,4 @@ const Guidelines: NextPage = () => {
   );
 };
 
-export default Guidelines;
+export default Page;

@@ -1,6 +1,4 @@
-import { type NextPage } from "next";
-
-const Refund: NextPage = () => {
+const Page = () => {
   return (
     <div className="relative min-h-screen overflow-x-hidden overflow-y-hidden p-5 pt-32 py-10 text-gray-100 ">
       <div className="mx-auto w-full max-w-7xl">
@@ -41,10 +39,7 @@ const Refund: NextPage = () => {
             Non-Refundable Services
           </h2>
           <p className="mt-2">
-            Please note that our registration services are non-refundable and
-            cannot be cancelled once payment has been made. This policy is in
-            place to ensure that we can deliver the best possible experience for
-            all our customers.
+            Please note that our registration services are non-refundable and cannot be cancelled once payment has been made. This policy is in place to ensure that we can deliver the best possible experience for all our customers. Registrations from non-engineering colleges are not permitted. In the event of any false or fraudulent registration, the organizing committee reserves the right to cancel the registration without issuing a refund
           </p>
 
           <h2 className="mt-4 text-2xl font-semibold">Payment Security</h2>
@@ -79,4 +74,4 @@ const Refund: NextPage = () => {
   );
 };
 
-export default Refund;
+export default Page;

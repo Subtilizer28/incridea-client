@@ -23,6 +23,7 @@ query AccommodationRequestsByUserId($userId: ID!) {
           price
         }
         user {
+          id
           college {
             name
           }

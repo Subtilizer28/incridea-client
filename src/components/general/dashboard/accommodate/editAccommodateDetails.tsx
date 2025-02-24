@@ -1,4 +1,4 @@
-import { type QueryResult, useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import React, { useEffect } from "react";
 import { type FC, useState } from "react";
 import { MdModeEditOutline } from "react-icons/md";
@@ -9,14 +9,13 @@ import createToast from "~/components/toast";
 import {
   AccommodationBookingStatus,
   type AccommodationRequestsQuery,
-  type AccommodationRequestsQueryVariables,
   GetAllHotelsDocument,
   UpdateAccommodationStatusDocument,
 } from "~/generated/generated";
 
 
 const AddAccommodateDetails: FC<{
-  accommodation: Extract<NonNullable<QueryResult<AccommodationRequestsQuery, AccommodationRequestsQueryVariables>["data"]>["accommodationRequests"], { __typename: "QueryAccommodationRequestsSuccess" }>["data"][number];
+  accommodation: Extract<AccommodationRequestsQuery["accommodationRequests"], { __typename: "QueryAccommodationRequestsSuccess" }>["data"][number];
 }> = ({ accommodation }) => {
   const [showModal, setShowModal] = useState(false);
   const [hotelDetails, setHotelDetails] = useState(accommodation.hotel.id);

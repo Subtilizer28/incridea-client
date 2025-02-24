@@ -1,0 +1,15 @@
+query getQuizFlag($teamId: Int = 10, $quizId: String = "") {
+  getQuizFlag(quizId: $quizId, teamId: $teamId) {
+    ... on QueryGetQuizFlagSuccess {
+      __typename
+      data {
+        allowUser
+        flags
+      }
+    }
+    ... on Error {
+      __typename
+      message
+    }
+  }
+}

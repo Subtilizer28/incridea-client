@@ -10,11 +10,8 @@ import { idToPid, idToTeamId } from "~/utils/id";
 import ViewTeamModal from "./viewTeamModal";
 
 const ValedictoryTab: FC = () => {
-  const { data: eventsData, loading: eventsLoading } = useQuery(
-    CompletedEventsDocument,
-  );
-
   const [query, setQuery] = useState("");
+
   const [csvData, setCsvData] = useState<
     {
       name: string;
@@ -27,6 +24,7 @@ const ValedictoryTab: FC = () => {
       eventName: string;
     }[]
   >([]);
+
   const [csvData1, setCsvData1] = useState<
     {
       eventName: string;
@@ -42,6 +40,7 @@ const ValedictoryTab: FC = () => {
     { label: "Runner Up", key: "runnerUp" },
     { label: "Second Runner Up", key: "secondRunnerUp" },
   ];
+
   const headers2 = [
     { label: "Team Id", key: "teamId" },
     { label: "Team Name", key: "teamName" },
@@ -52,6 +51,11 @@ const ValedictoryTab: FC = () => {
     { label: "College", key: "college" },
     { label: "Email", key: "email" },
   ];
+
+  const { data: eventsData, loading: eventsLoading } = useQuery(
+    CompletedEventsDocument,
+  );
+
   useEffect(() => {
     const processData = () => {
       if (
@@ -123,6 +127,7 @@ const ValedictoryTab: FC = () => {
     };
     processData();
   }, [eventsData]);
+
   return (
     <>
       <div className="mt-5 flex basis-2/3 flex-col justify-center gap-1 md:gap-0.5">
@@ -172,68 +177,68 @@ const ValedictoryTab: FC = () => {
         )}
         <div className="max-h-80 w-full overflow-y-auto text-center md:h-[300px] md:max-h-80">
           {eventsData?.completedEvents.__typename ===
-          "QueryCompletedEventsSuccess"
+            "QueryCompletedEventsSuccess"
             ? eventsData.completedEvents.data.map(
-                (event, i) =>
-                  event.name.toLowerCase().includes(query.toLowerCase()) && (
-                    <div
-                      key={i}
-                      className={`mb-3 ml-2 flex flex-col items-start rounded-lg bg-white/10 p-3 md:my-0 md:flex-row md:items-center md:rounded-none md:p-4`}
-                    >
-                      <h1 className="flex basis-1/4 justify-start py-0.5 text-start text-lg">
-                        {event?.name}
-                      </h1>
-                      <h1 className="mt-2 flex basis-1/4 py-0.5 text-lg md:mt-0 md:justify-center md:pl-5 md:text-center">
-                        {event.winner?.map((eventData, i) =>
-                          eventData.type === WinnerType.Winner ? (
-                            <ViewTeamModal
-                              key={i}
-                              teamId={eventData.team.id}
-                              modalTitle={event.name}
-                              modalResult={eventData.type}
-                              teamName={eventData.team.name}
-                              eventType={event.eventType}
-                            />
-                          ) : (
-                            ""
-                          ),
-                        )}
-                      </h1>
-                      <h1 className="mt-2 flex basis-1/4 py-0.5 text-lg md:mt-0 md:justify-center md:pl-5 md:text-center">
-                        {event.winner?.map((eventData, i) =>
-                          eventData.type === WinnerType.RunnerUp ? (
-                            <ViewTeamModal
-                              key={i}
-                              teamId={eventData.team.id}
-                              modalTitle={event.name}
-                              modalResult={eventData.type}
-                              teamName={eventData.team.name}
-                              eventType={event.eventType}
-                            />
-                          ) : (
-                            ""
-                          ),
-                        )}
-                      </h1>
-                      <h1 className="mt-2 flex basis-1/4 py-0.5 text-lg md:mt-0 md:justify-center md:pl-5 md:text-center">
-                        {event.winner?.map((eventData, i) =>
-                          eventData.type === WinnerType.SecondRunnerUp ? (
-                            <ViewTeamModal
-                              key={i}
-                              teamId={eventData.team.id}
-                              modalTitle={event.name}
-                              modalResult={eventData.type}
-                              teamName={eventData.team.name}
-                              eventType={event.eventType}
-                            />
-                          ) : (
-                            ""
-                          ),
-                        )}
-                      </h1>
-                    </div>
-                  ),
-              )
+              (event, i) =>
+                event.name.toLowerCase().includes(query.toLowerCase()) && (
+                  <div
+                    key={i}
+                    className={`mb-3 ml-2 flex flex-col items-start rounded-lg bg-white/10 p-3 md:my-0 md:flex-row md:items-center md:rounded-none md:p-4`}
+                  >
+                    <h1 className="flex basis-1/4 justify-start py-0.5 text-start text-lg">
+                      {event?.name}
+                    </h1>
+                    <h1 className="mt-2 flex basis-1/4 py-0.5 text-lg md:mt-0 md:justify-center md:pl-5 md:text-center">
+                      {event.winner?.map((eventData, i) =>
+                        eventData.type === WinnerType.Winner ? (
+                          <ViewTeamModal
+                            key={i}
+                            teamId={eventData.team.id}
+                            modalTitle={event.name}
+                            modalResult={eventData.type}
+                            teamName={eventData.team.name}
+                            eventType={event.eventType}
+                          />
+                        ) : (
+                          ""
+                        ),
+                      )}
+                    </h1>
+                    <h1 className="mt-2 flex basis-1/4 py-0.5 text-lg md:mt-0 md:justify-center md:pl-5 md:text-center">
+                      {event.winner?.map((eventData, i) =>
+                        eventData.type === WinnerType.RunnerUp ? (
+                          <ViewTeamModal
+                            key={i}
+                            teamId={eventData.team.id}
+                            modalTitle={event.name}
+                            modalResult={eventData.type}
+                            teamName={eventData.team.name}
+                            eventType={event.eventType}
+                          />
+                        ) : (
+                          ""
+                        ),
+                      )}
+                    </h1>
+                    <h1 className="mt-2 flex basis-1/4 py-0.5 text-lg md:mt-0 md:justify-center md:pl-5 md:text-center">
+                      {event.winner?.map((eventData, i) =>
+                        eventData.type === WinnerType.SecondRunnerUp ? (
+                          <ViewTeamModal
+                            key={i}
+                            teamId={eventData.team.id}
+                            modalTitle={event.name}
+                            modalResult={eventData.type}
+                            teamName={eventData.team.name}
+                            eventType={event.eventType}
+                          />
+                        ) : (
+                          ""
+                        ),
+                      )}
+                    </h1>
+                  </div>
+                ),
+            )
             : ""}
         </div>
       </div>

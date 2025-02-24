@@ -7,7 +7,7 @@ import Spinner from "~/components/spinner";
 import createToast from "~/components/toast";
 import {
   DeleteWinnerDocument,
-  type JudgeGetTeamsByRoundSubscription,
+  type JudgeGetTeamsByRoundQuery,
   PromoteToNextRoundDocument,
   type WinnersByEventQuery,
 } from "~/generated/generated";
@@ -16,6 +16,7 @@ import { idToPid, idToTeamId } from "~/utils/id";
 import ConfirmRoundModal from "./confirmRoundModal";
 
 const SelectedTeamList = ({
+  shouldPoll,
   teams,
   roundNo,
   finalRound,
@@ -24,7 +25,8 @@ const SelectedTeamList = ({
   eventId,
   eventType,
 }: {
-  teams: JudgeGetTeamsByRoundSubscription;
+  shouldPoll: boolean,
+  teams: JudgeGetTeamsByRoundQuery;
   roundNo: number;
   finalRound: boolean;
   winners: WinnersByEventQuery | undefined;
@@ -34,6 +36,9 @@ const SelectedTeamList = ({
 }) => {
   const [promote, { loading: promoteLoading }] = useMutation(
     PromoteToNextRoundDocument,
+    {
+      refetchQueries: [...(shouldPoll ? [] : ["JudgeGetTeamsByRound"])],
+    }
   );
 
   const [deleteWinner, { loading: deleteLoading }] = useMutation(
@@ -70,7 +75,7 @@ const SelectedTeamList = ({
 
       {!(
         teams.judgeGetTeamsByRound.__typename ===
-          "SubscriptionJudgeGetTeamsByRoundSuccess" &&
+        "QueryJudgeGetTeamsByRoundSuccess" &&
         teams.judgeGetTeamsByRound.data.filter((team) => team.roundNo > roundNo)
           .length === 0
       ) &&
@@ -93,32 +98,28 @@ const SelectedTeamList = ({
         <div className={`flex items-center rounded-lg bg-white/10 p-2 px-5`}>
           <div className="flex w-full flex-row gap-5">
             <div
-              className={`${
-                finalRound ? "basis-1/4" : "basis-1/3"
-              } text-white/80`}
+              className={`${finalRound ? "basis-1/4" : "basis-1/3"
+                } text-white/80`}
             >
               Team Name
             </div>
             <div
-              className={`${
-                finalRound ? "basis-1/4" : "basis-1/3"
-              } text-white/80`}
+              className={`${finalRound ? "basis-1/4" : "basis-1/3"
+                } text-white/80`}
             >
               {teamOrParticipant === "Participant" ? "PID" : "Team ID"}
             </div>
             {finalRound && (
               <div
-                className={`${
-                  finalRound ? "basis-1/4" : "basis-1/3"
-                } text-white/80`}
+                className={`${finalRound ? "basis-1/4" : "basis-1/3"
+                  } text-white/80`}
               >
                 Position
               </div>
             )}
             <div
-              className={`${
-                finalRound ? "basis-1/4" : "basis-1/3"
-              } text-white/80`}
+              className={`${finalRound ? "basis-1/4" : "basis-1/3"
+                } text-white/80`}
             >
               Remove
             </div>
@@ -127,7 +128,7 @@ const SelectedTeamList = ({
 
         {!finalRound &&
           teams.judgeGetTeamsByRound.__typename ===
-            "SubscriptionJudgeGetTeamsByRoundSuccess" &&
+          "QueryJudgeGetTeamsByRoundSuccess" &&
           teams.judgeGetTeamsByRound.data.filter(
             (team) => team.roundNo > roundNo,
           ).length === 0 && (
@@ -138,7 +139,7 @@ const SelectedTeamList = ({
 
         {!finalRound &&
           teams.judgeGetTeamsByRound.__typename ===
-            "SubscriptionJudgeGetTeamsByRoundSuccess" &&
+          "QueryJudgeGetTeamsByRoundSuccess" &&
           teams.judgeGetTeamsByRound.data
             .filter((team) => team.roundNo > roundNo)
             .map((team, index) => (
@@ -227,6 +228,7 @@ const SelectedTeamList = ({
             </div>
           ))}
         <ConfirmRoundModal
+          shouldPoll={shouldPoll}
           winners={winners}
           roundNo={roundNo}
           winnersLoading={winnersLoading}

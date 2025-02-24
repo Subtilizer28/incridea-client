@@ -1,10 +1,11 @@
+import { useQuery } from "@apollo/client";
 import type { GetServerSideProps } from "next";
-import { GetAllQuestionsDocument } from "~/generated/generated";
+import { useEffect, useState } from "react";
+import { BiLoader } from "react-icons/bi";
+
 import IntroductionPage from "~/components/general/dashboard/organizer/quiz/Introduction";
 import QuizPage from "~/components/general/dashboard/organizer/quiz/quizpage";
-import { useEffect, useState } from "react";
-import { useQuery } from "@apollo/client";
-import { BiLoader } from "react-icons/bi";
+import { GetAllQuestionsDocument } from "~/generated/generated";
 
 type Props = {
   quizId: string;
@@ -34,6 +35,7 @@ const AttemptQuizPage = ({ quizId, error }: Props) => {
   const [startTime, setStartTime] = useState<Date>(new Date());
   const [endTime, setEndTime] = useState<Date>(new Date());
   const [teamId, setTeamId] = useState<number>(0);
+  const [overridePassword, setOverridePassword] = useState<string>("");
 
   const { data: questionsData } = useQuery(GetAllQuestionsDocument, {
     variables: { quizId: quizId },
@@ -44,8 +46,19 @@ const AttemptQuizPage = ({ quizId, error }: Props) => {
     if (
       questionsData?.getAllquestions.__typename ===
       "QueryGetAllquestionsSuccess"
-    )
-      setQuestions(questionsData.getAllquestions.data);
+    ) {
+      const questions = questionsData.getAllquestions.data;
+      const mappedqs = questions.map((question) => ({
+        id: question.id,
+        question: question.question,
+        image: question.image,
+        options: question.options,
+        isCode: question.isCode,
+        description: question.description,
+      }));
+      const sortedQuestions = mappedqs.sort(() => Math.random() - 0.5);
+      setQuestions(sortedQuestions);
+    }
   }, [questionsData]);
 
   if (error) {
@@ -64,13 +77,14 @@ const AttemptQuizPage = ({ quizId, error }: Props) => {
           setDescription={setDescription}
           quizId={quizId}
           setMyTeamId={setTeamId}
+          setOverridePassword={setOverridePassword}
         />
       ) : !(questions.length > 0) ? (
-        <div className="w-full h-screen grid justify-center items-center text-3xl">
+        <div className="grid h-screen w-full items-center justify-center text-3xl">
           {/* <p>Loading...</p> */}
           <BiLoader
             size={100}
-            className="animate-spin h-6 w-6 text-primary-500"
+            className="h-6 w-6 animate-spin text-primary-500"
           />
         </div>
       ) : (
@@ -82,6 +96,7 @@ const AttemptQuizPage = ({ quizId, error }: Props) => {
           endTime={endTime}
           quizId={quizId}
           teamId={teamId}
+          overridePassword={overridePassword}
         />
       )}
     </div>

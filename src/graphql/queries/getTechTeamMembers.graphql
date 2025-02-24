@@ -1,0 +1,21 @@
+query GetTechTeamMembers {
+  getTechTeamMembers {
+    ... on Error {
+      __typename
+      message
+    }
+    ... on QueryGetTechTeamMembersSuccess {
+      __typename
+      data {
+        github
+        id
+        role
+        imageUrl
+        instagram
+        quote
+        name
+        linkedin
+      }
+    }
+  }
+}

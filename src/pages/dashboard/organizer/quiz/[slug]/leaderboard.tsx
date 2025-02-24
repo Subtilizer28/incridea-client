@@ -36,13 +36,9 @@ const QuizLeaderboard = () => {
   const [sortedLeaderboard, setSortedLeaderboard] = useState<Leaderboard[]>([]);
   const [processedQuizScores, setProcessedQuizScores] = useState(false);
 
-  const { data } = useQuery(EventByOrganizerDocument, {
-    variables: {
-      organizerId: user?.id ?? "0",
-    },
-  });
+  const { data } = useQuery(EventByOrganizerDocument);
 
-  const event = data?.eventByOrganizer.find((event) => event.id === eventId);
+  const event = data?.eventByOrganizer.__typename === "QueryEventByOrganizerSuccess" ? data.eventByOrganizer.data.find((event) => event.id === eventId) : undefined;
   const round = event?.rounds.find((round) => round.roundNo === roundInt);
   const quizId = round?.quiz?.id;
 
@@ -286,15 +282,15 @@ const QuizLeaderboard = () => {
               </div>
               {sortedLeaderboard.filter((team) => team.selected).length > 0 && (
                 <Button
-                  className="px-8 py-3 text-[1rem] min-w-[12rem] text-center ml-10 md:text-[20px] 
-                  bg-amber-500 hover:bg-orange-400/90 
+                  className="px-8 py-3 text-[1rem] min-w-[12rem] text-center ml-10 md:text-[20px]
+                  bg-amber-500 hover:bg-orange-400/90
                   text-amber-100
-                  transition-all duration-300 
+                  transition-all duration-300
                   hover:opacity-90
                   relative
                   before:absolute before:inset-0
-                  before:bg-amber-500 
-                  before:skew-x-[20deg] 
+                  before:bg-amber-500
+                  before:skew-x-[20deg]
                   before:-z-10
                   hover:before:bg-orange-400/90"
                   style={{

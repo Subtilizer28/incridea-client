@@ -14,6 +14,7 @@ query GetQuizById($id: String!) {
         name
         roundNo
         startTime
+        overridePassword
         questions {
           id
           description

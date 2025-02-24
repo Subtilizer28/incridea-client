@@ -1,4 +1,4 @@
-import { type QueryResult, useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { Dialog, Transition } from "@headlessui/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -16,7 +16,6 @@ import {
   DeleteCardDocument,
   GetAllSubmissionsDocument,
   type GetAllSubmissionsQuery,
-  type GetAllSubmissionsQueryVariables,
   GetCardsDocument,
 } from "~/generated/generated";
 import { useAuth } from "~/hooks/useAuth";
@@ -43,12 +42,7 @@ const EasterEggDashboard = () => {
 
   const [sortedSubmissions, setSortedSubmissions] = useState<
     Extract<
-      NonNullable<
-        QueryResult<
-          GetAllSubmissionsQuery,
-          GetAllSubmissionsQueryVariables
-        >["data"]
-      >["getAllSubmissions"],
+      GetAllSubmissionsQuery["getAllSubmissions"],
       {
         __typename: "QueryGetAllSubmissionsSuccess";
       }
@@ -263,7 +257,7 @@ const EasterEggDashboard = () => {
             ) : (
               <div className="flex flex-wrap justify-between gap-3">
                 {data?.getAllSubmissions.__typename ===
-                "QueryGetAllSubmissionsSuccess" ? (
+                  "QueryGetAllSubmissionsSuccess" ? (
                   sortedSubmissions.length === 0 ? (
                     <span className="text-white/70">No submissions found</span>
                   ) : (
@@ -319,10 +313,9 @@ const EasterEggDashboard = () => {
                       cards.getCards.data.map((card, index) => (
                         <div
                           key={index}
-                          className={`${
-                            (deleteCardLoading || cardsLoading) &&
+                          className={`${(deleteCardLoading || cardsLoading) &&
                             "pointer-events-none opacity-80"
-                          } flex min-w-[300px] basis-full flex-col rounded-md bg-white/20 shadow-sm md:basis-[45%]`}
+                            } flex min-w-[300px] basis-full flex-col rounded-md bg-white/20 shadow-sm md:basis-[45%]`}
                         >
                           <div className="mb-2 flex items-center gap-2 px-4 pt-4 text-xl md:px-4 md:pt-4">
                             <h2>Clue ID: {card.id}</h2>

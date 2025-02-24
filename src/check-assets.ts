@@ -8,6 +8,7 @@ const listFiles = (dir: string) => {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     const filePath = path.join(dir, file);
+    if (filePath.includes("public/favicon")) continue;
     const stat = fs.statSync(filePath);
     if (stat.isDirectory())
       results = results.concat(listFiles(filePath));

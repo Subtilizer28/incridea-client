@@ -1,4 +1,3 @@
-import { type QueryResult } from "@apollo/client";
 import { type GetStaticPaths, type GetStaticProps } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,7 +22,6 @@ import EventSEO from "~/components/SEO/EventSEO";
 import {
   EventByIdDocument,
   type EventByIdQuery,
-  type EventByIdQueryVariables,
   EventType,
   PublishedEventsSlugDocument,
 } from "~/generated/generated";
@@ -31,10 +29,7 @@ import { client } from "~/lib/apollo";
 
 type Props =
   | {
-    event: Extract<
-      NonNullable<
-        QueryResult<EventByIdQuery, EventByIdQueryVariables>["data"]
-      >["eventById"],
+    event: Extract<EventByIdQuery["eventById"],
       {
         __typename: "QueryEventByIdSuccess";
       }
@@ -138,7 +133,7 @@ const Page = ({ event, error }: Props) => {
       },
       {
         name: "Fees",
-        text: event?.id==="50" ? 60 : event?.id ==="52" ? 500: event?.id==="53" ? 250 : event?.id==="54" ? 200 : event?.id==="55" ? 150 : event?.id==="56" ? 300 : event?.fees,
+        text: event?.id === "50" ? 60 : event?.id === "52" ? 500 : event?.id === "53" ? 250 : event?.id === "54" ? 200 : event?.id === "55" ? 150 : event?.id === "56" ? 300 : event?.fees,
         Icon: IoCashOutline,
       },
       {

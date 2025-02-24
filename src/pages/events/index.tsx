@@ -84,9 +84,9 @@ const Page = ({ data }: Props) => {
       });
       return;
     }
-  
+
     if (calledXp) return;
-  
+
     try {
       setCalledXp(true);
       const { data } = await addXp();
@@ -130,7 +130,7 @@ const Page = ({ data }: Props) => {
         (event) =>
           event.category.replace("_", "").toLowerCase() ===
           currentCategoryFilter.replace("_", "").toLocaleLowerCase(),
-        
+
       );
 
     setFilteredEvents(tempFilteredEvents);
@@ -152,7 +152,7 @@ const Page = ({ data }: Props) => {
     const searchValue = e.target.value.toLowerCase();
     const searchArray = ["easteregg", "easter egg", "time stone", "timestone"];
     if (searchArray.includes(searchValue)) {
-       await handleAddXp();
+      await handleAddXp();
     }
   };
 
@@ -325,7 +325,7 @@ const Page = ({ data }: Props) => {
                     </button>
                   </a>
                   <a
-                    href="https://drive.google.com/file/d/1KF0Y-z0_bDHQBj6JfQcvZ5H2ezgQ9_wq/view?usp=sharing"
+                    href="https://drive.google.com/drive/folders/1jp9xTicps-O0I8E-h9pyCJ2aYZ2Y3ngC?usp=sharing"
                     target="_blank"
                     download
                   >

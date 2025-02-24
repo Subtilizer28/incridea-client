@@ -39,7 +39,8 @@ const InnerPage = () => {
     toast.loading('Uploading file...')
   }, [])
 
-  const onClientUploadComplete = useMemo<ComponentProps<typeof UploadButton>["onClientUploadComplete"]>(() => () => {
+  const onClientUploadComplete = useMemo<ComponentProps<typeof UploadButton>["onClientUploadComplete"]>(() => (res) => {
+    console.log(res)
     toast.dismiss()
     toast.success('File uploaded successfully')
   }, [])
